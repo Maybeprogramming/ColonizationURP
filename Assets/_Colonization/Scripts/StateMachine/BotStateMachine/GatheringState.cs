@@ -11,7 +11,7 @@ public class GatheringState : IState
 
     public void Enter()
     {
-        _animationDuration = 1.8f;
+        _animationDuration = 1.5f;
     }
 
     private void PickupResource()
