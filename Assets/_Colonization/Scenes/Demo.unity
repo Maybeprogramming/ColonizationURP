@@ -843,6 +843,8 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
+  - component: {fileID: 963194231}
+  - component: {fileID: 963194230}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -968,6 +970,42 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &963194230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e01dbb0fd5318b14ba017c3a06c4b14f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraRotation
+  _horizontalSensitivity: 6
+  _verticalSensitivity: 6
+  _scrollSensitivity: 10
+  _horizontalSmoothness: 0.5
+  _verticalSmoothness: 0.5
+  _scrollSmoothness: 0.5
+  _minVerticalAngle: 15
+  _maxVerticalAngle: 70
+  _minDistance: 10
+  _maxDistance: 20
+--- !u!114 &963194231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e79e839427575f748be36c5c854f8d2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraMover
+  _target: {fileID: 1612269319}
+  _followSpeed: 0.2
 --- !u!1 &976946076
 GameObject:
   m_ObjectHideFlags: 0
@@ -1933,6 +1971,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2868adbc664e0c740812eb20989f7bf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bot
+--- !u!4 &1612269319 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7823926476195189616, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
+  m_PrefabInstance: {fileID: 1180791263}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1629565244
 GameObject:
   m_ObjectHideFlags: 0
