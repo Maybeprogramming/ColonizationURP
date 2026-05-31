@@ -19,6 +19,8 @@ Shader "Custom/GrassGeometry"
 
         Pass
         {
+            Tags { "LightMode" = "UniversalForward" }
+
             HLSLPROGRAM
             #pragma vertex vert
             #pragma geometry geom
@@ -64,7 +66,7 @@ Shader "Custom/GrassGeometry"
                 return frac(sin(seed * 123.456) * 789.123);
             }
 
-            [maxvertexcount(6)]
+            [maxvertexcount(12)]
             void geom(point v2g input[1], inout TriangleStream<g2f> stream)
             {
                 uint id = input[0].instanceID;
@@ -75,33 +77,56 @@ Shader "Custom/GrassGeometry"
                 float height = _BladeHeight * (1 - _Jitter + GetRandom(seed + 1) * _Jitter);
                 float width = _BladeWidth * (0.8 + GetRandom(seed + 2) * 0.4);
                 float wind = sin(_Time.y * _WindSpeed + seed * 6.28) * _WindStrength;
-                float3 windOffset = float3(wind * height, 0, 0);
+
+                float3 viewDir = _WorldSpaceCameraPos - root;
+                viewDir.y = 0;
+                viewDir = normalize(viewDir);
+                float3 bladeRight = cross(float3(0, 1, 0), viewDir);
+
+                float3 windOffset = bladeRight * wind * height;
 
                 float3 top = root + float3(0, height, 0) + windOffset;
 
-                float3 vertices[6];
-                vertices[0] = root + float3(-width, 0, 0);
-                vertices[1] = root + float3(width, 0, 0);
-                vertices[2] = top;
-                vertices[3] = top;
-                vertices[4] = root + float3(width, 0, 0);
-                vertices[5] = top + float3(width * 0.2, 0, 0);
+                float3 rightVectors[2];
+                rightVectors[0] = bladeRight;
+                rightVectors[1] = viewDir;
 
-                float2 uvs[6];
+                float2 uvs[12];
                 uvs[0] = float2(0, 0);
                 uvs[1] = float2(1, 0);
-                uvs[2] = float2(0, 1);
-                uvs[3] = float2(0, 1);
+                uvs[2] = float2(0.5, 1);
+                uvs[3] = float2(0.5, 1);
                 uvs[4] = float2(1, 0);
-                uvs[5] = float2(1, 1);
+                uvs[5] = float2(0.5, 1);
+                uvs[6] = float2(0, 0);
+                uvs[7] = float2(1, 0);
+                uvs[8] = float2(0.5, 1);
+                uvs[9] = float2(0.5, 1);
+                uvs[10] = float2(1, 0);
+                uvs[11] = float2(0.5, 1);
 
-                for (int i = 0; i < 6; i++)
+                for (int quad = 0; quad < 2; quad++)
                 {
-                    g2f o;
-                    o.pos = TransformWorldToHClip(vertices[i]);
-                    o.worldPos = vertices[i];
-                    o.uv = uvs[i];
-                    stream.Append(o);
+                    float3 right = rightVectors[quad];
+
+                    float3 vertices[6];
+                    vertices[0] = root + right * -width;
+                    vertices[1] = root + right * width;
+                    vertices[2] = top;
+                    vertices[3] = top;
+                    vertices[4] = root + right * width;
+                    vertices[5] = top + right * width * 0.2;
+
+                    for (int i = 0; i < 6; i++)
+                    {
+                        g2f o;
+                        o.pos = TransformWorldToHClip(vertices[i]);
+                        o.worldPos = vertices[i];
+                        o.uv = uvs[quad * 6 + i];
+                        stream.Append(o);
+                    }
+
+                    stream.RestartStrip();
                 }
             }
 
@@ -114,6 +139,113 @@ Shader "Custom/GrassGeometry"
                 color *= mainLight.color * (mainLight.shadowAttenuation * 0.6 + 0.4) * NdotL + 0.3;
 
                 return half4(color, 1);
+            }
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags { "LightMode" = "ShadowCaster" }
+
+            Cull Off
+
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma geometry geom
+            #pragma fragment fragShadow
+
+            #pragma require geometry
+            #pragma target 4.6
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+
+            StructuredBuffer<float4> _Positions;
+
+            float _BladeHeight;
+            float _BladeWidth;
+            float _WindSpeed;
+            float _WindStrength;
+            float _Jitter;
+
+            struct v2g
+            {
+                uint instanceID : TEXCOORD0;
+            };
+
+            struct g2f
+            {
+                float4 pos : SV_POSITION;
+            };
+
+            v2g vert(uint instanceID : SV_InstanceID)
+            {
+                v2g o;
+                o.instanceID = instanceID;
+                return o;
+            }
+
+            float GetRandom(float seed)
+            {
+                return frac(sin(seed * 123.456) * 789.123);
+            }
+
+            [maxvertexcount(12)]
+            void geom(point v2g input[1], inout TriangleStream<g2f> stream)
+            {
+                uint id = input[0].instanceID;
+                float4 data = _Positions[id];
+                float3 root = data.xyz;
+                float seed = data.w;
+
+                float height = _BladeHeight * (1 - _Jitter + GetRandom(seed + 1) * _Jitter);
+                float width = _BladeWidth * (0.8 + GetRandom(seed + 2) * 0.4);
+                float wind = sin(_Time.y * _WindSpeed + seed * 6.28) * _WindStrength;
+
+                float3 viewDir = _WorldSpaceCameraPos - root;
+                viewDir.y = 0;
+                viewDir = normalize(viewDir);
+                float3 bladeRight = cross(float3(0, 1, 0), viewDir);
+
+                float3 windOffset = bladeRight * wind * height;
+
+                float3 top = root + float3(0, height, 0) + windOffset;
+
+                float3 rightVectors[2];
+                rightVectors[0] = bladeRight;
+                rightVectors[1] = viewDir;
+
+                float3 normalWS = float3(0, 1, 0);
+                float3 lightDir = _MainLightPosition.xyz;
+
+                for (int quad = 0; quad < 2; quad++)
+                {
+                    float3 right = rightVectors[quad];
+
+                    float3 vertices[6];
+                    vertices[0] = root + right * -width;
+                    vertices[1] = root + right * width;
+                    vertices[2] = top;
+                    vertices[3] = top;
+                    vertices[4] = root + right * width;
+                    vertices[5] = top + right * width * 0.2;
+
+                    for (int i = 0; i < 6; i++)
+                    {
+                        g2f o;
+                        float3 biased = ApplyShadowBias(vertices[i], normalWS, lightDir);
+                        o.pos = TransformWorldToHClip(biased);
+                        stream.Append(o);
+                    }
+
+                    stream.RestartStrip();
+                }
+            }
+
+            half4 fragShadow(g2f i) : SV_TARGET
+            {
+                return 0;
             }
             ENDHLSL
         }

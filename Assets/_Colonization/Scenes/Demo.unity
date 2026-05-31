@@ -235,7 +235,7 @@ Transform:
   m_GameObject: {fileID: 89278471}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -261,10 +261,9 @@ MonoBehaviour:
   _container: {fileID: 1629565245}
   _minTimeSpawn: 1
   _maxTimeSpawn: 2
-  _offsetXPosition: 10
-  _offsetZPosition: 7.5
+  _offsetXPosition: 8
+  _offsetZPosition: 7
   _positionY: 1
-  _spawnCenterPosition: {x: 0, y: 0, z: 0}
   _maxCount: 10
 --- !u!1001 &160061617
 PrefabInstance:
@@ -425,7 +424,7 @@ Transform:
   m_GameObject: {fileID: 269658389}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -885,15 +884,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _scannerPoint: {fileID: 269658390}
-  _radius: 13
+  _radius: 15
   _layerMask:
     serializedVersion: 2
     m_Bits: 64
   _timeBetweenScanning: 3
   _animator: {fileID: 1542622371}
-  _isGizmosVisible: 0
-  _transparencyGizmos: 0.15
-  _gizmosColor: {r: 0, g: 1, b: 0.76712465, a: 0}
+  _isGizmosVisible: 1
+  _transparencyGizmos: 1
+  _gizmosColor: {r: 1, g: 1, b: 1, a: 0}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0

@@ -19,15 +19,6 @@ public class ResourceScanner : MonoBehaviour
 
     public event Action<Resource> ResourceFound;
 
-    private void OnDrawGizmos()
-    {
-        if (_isGizmosVisible)
-        {
-            Gizmos.color = new Color(_gizmosColor.r, _gizmosColor.g, _gizmosColor.b, _transparencyGizmos);
-            Gizmos.DrawSphere(_scannerPoint.position, _radius);
-        }
-    }
-
     private void Start()
     {
         _waitTimer = new WaitForSeconds(_timeBetweenScanning);
@@ -61,6 +52,16 @@ public class ResourceScanner : MonoBehaviour
 
             _animator.Stop();
             ScanLocation();
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (_isGizmosVisible)
+        {
+            Gizmos.color = new Color(_gizmosColor.r, _gizmosColor.g, _gizmosColor.b, _transparencyGizmos);
+
+            Gizmos.DrawWireSphere(_scannerPoint.position, _radius);
         }
     }
 }

@@ -11,9 +11,9 @@ public class SpawnerResources : BaseResourcePool<Resource>
     [SerializeField] private float _offsetXPosition;
     [SerializeField] private float _offsetZPosition;
     [SerializeField] private float _positionY;
-    [SerializeField] private Vector3 _spawnCenterPosition;
     [SerializeField] private int _maxCount;
 
+    public Vector3 SpawnCenterPosition => transform.position;
     public event Action Spawned;
 
     private void Start()
@@ -43,10 +43,10 @@ public class SpawnerResources : BaseResourcePool<Resource>
 
     private Vector3 GetRandomPosition()
     {
-        float minX = _spawnCenterPosition.x - _offsetXPosition;
-        float maxX = _spawnCenterPosition.x + _offsetXPosition;
-        float minZ = _spawnCenterPosition.z - _offsetZPosition;
-        float maxZ = _spawnCenterPosition.z + _offsetZPosition;
+        float minX = SpawnCenterPosition.x - _offsetXPosition;
+        float maxX = SpawnCenterPosition.x + _offsetXPosition;
+        float minZ = SpawnCenterPosition.z - _offsetZPosition;
+        float maxZ = SpawnCenterPosition.z + _offsetZPosition;
 
         return new Vector3(Random.Range(minX, maxX), _positionY, Random.Range(minZ, maxZ));
     }
@@ -65,5 +65,14 @@ public class SpawnerResources : BaseResourcePool<Resource>
     }
 
     private WaitForSeconds GetRandomDelayTime() =>    
-        new WaitForSeconds(Random.Range(_minTimeSpawn, _maxTimeSpawn));    
+        new WaitForSeconds(Random.Range(_minTimeSpawn, _maxTimeSpawn));
+
+    private void OnDrawGizmosSelected()
+    {
+        Vector3 center = SpawnCenterPosition;
+        Vector3 size = new Vector3(_offsetXPosition + _offsetXPosition, Vector3.one.y, _offsetZPosition + _offsetZPosition);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(center, size);
+    }
 }
