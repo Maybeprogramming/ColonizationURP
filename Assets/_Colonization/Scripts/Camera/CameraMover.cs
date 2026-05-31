@@ -4,10 +4,9 @@ using UnityEngine;
 public class CameraMover : MonoBehaviour
 {
     [SerializeField] private Transform _target;
-    [SerializeField] private float _followSpeed;
+    [SerializeField, Range(5f, 50f)] private float _followSpeed;
 
     private CameraRotator _cameraRotator;
-    private Vector3 _velocity;
 
     private void Awake()
     {
@@ -17,7 +16,7 @@ public class CameraMover : MonoBehaviour
     private void LateUpdate()
     {
         Vector3 desiredPosition = _target.position + _cameraRotator.GetOffset();
-        transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref _velocity, _followSpeed);
+        transform.position = Vector3.Lerp(transform.position, desiredPosition, _followSpeed * Time.deltaTime);
         transform.LookAt(_target);
     }
 }

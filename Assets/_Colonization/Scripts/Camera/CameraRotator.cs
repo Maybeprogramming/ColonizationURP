@@ -2,11 +2,8 @@ using UnityEngine;
 
 public class CameraRotator : MonoBehaviour
 {
-    private const string MouseX = "Mouse X";
-    private const string MouseY = "Mouse Y";
-    private const string MouseScrollWheel = "Mouse ScrollWheel";
-
     [SerializeField] private Transform _target;
+    [SerializeField] private PlayerInputSystem _input;
     [SerializeField, Range(0.1f, 10f)] private float _horizontalSensitivity;
     [SerializeField, Range(0.1f, 10f)] private float _verticalSensitivity;
     [SerializeField, Range(0.1f, 10f)] private float _scrollSensitivity;
@@ -25,7 +22,49 @@ public class CameraRotator : MonoBehaviour
     private float _targetVertical;
     private float _targetDistance;
 
+    private Vector2 _lookDelta => _input.LookDelta;
+
     private void Start()
+    {
+        Init();
+    }
+
+    private void Update()
+    {
+        HandleRotation();
+        HandleZoom();
+        HandleSmothing();
+    }
+
+    private void HandleZoom()
+    {
+        _targetDistance -= _input.ScrollDelta.y * _scrollSensitivity;
+        _targetDistance = Mathf.Clamp(_targetDistance, _minDistance, _maxDistance);        
+    }
+
+    private void HandleSmothing()
+    {
+        _currentHorizontal = Mathf.Lerp(_currentHorizontal, _targetHorizontal, _horizontalSmoothness * Time.deltaTime);
+        _currentVertical = Mathf.Lerp(_currentVertical, _targetVertical, _verticalSmoothness * Time.deltaTime);
+        _currentDistance = Mathf.Lerp(_currentDistance, _targetDistance, _scrollSmoothness * Time.deltaTime);
+    }
+
+    private void HandleRotation()
+    {
+        if (_input.IsRightMousePressed)
+        {
+            _targetHorizontal += _lookDelta.x * _horizontalSensitivity;
+            _targetVertical -= _lookDelta.y * _verticalSensitivity;
+            _targetVertical = Mathf.Clamp(_targetVertical, _minVerticalAngle, _maxVerticalAngle);
+        }
+        else
+        {
+            _targetHorizontal = _currentHorizontal;
+            _targetVertical = _currentVertical;
+        }
+    }
+
+    private void Init()
     {
         Vector3 offset = transform.position - _target.position;
         _currentDistance = offset.magnitude;
@@ -38,30 +77,6 @@ public class CameraRotator : MonoBehaviour
 
         _targetHorizontal = _currentHorizontal;
         _targetVertical = _currentVertical;
-    }
-
-    private void Update()
-    {
-        if (Input.GetMouseButton(1))
-        {
-            _targetHorizontal += Input.GetAxis(MouseX) * _horizontalSensitivity;
-            _targetVertical -= Input.GetAxis(MouseY) * _verticalSensitivity;
-            _targetVertical = Mathf.Clamp(_targetVertical, _minVerticalAngle, _maxVerticalAngle);
-        }
-        else
-        {
-            _targetHorizontal = _currentHorizontal;
-            _targetVertical = _currentVertical;
-        }
-
-        _targetDistance -= Input.GetAxis(MouseScrollWheel) * _scrollSensitivity;
-        _targetDistance = Mathf.Clamp(_targetDistance, _minDistance, _maxDistance);
-
-        float deltaTime = Time.deltaTime;
-
-        _currentHorizontal = Mathf.Lerp(_currentHorizontal, _targetHorizontal, _horizontalSmoothness * deltaTime);
-        _currentVertical = Mathf.Lerp(_currentVertical, _targetVertical, _verticalSmoothness * deltaTime);
-        _currentDistance = Mathf.Lerp(_currentDistance, _targetDistance, _scrollSmoothness * deltaTime);
     }
 
     public Vector3 GetOffset()

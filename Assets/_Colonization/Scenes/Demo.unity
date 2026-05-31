@@ -257,10 +257,10 @@ MonoBehaviour:
   _collectionCheck: 1
   _defaultCapacity: 3
   _poolMaxSize: 15
-  _entityName: Box
+  _entityName: Pumpkin
   _container: {fileID: 1629565245}
   _minTimeSpawn: 1
-  _maxTimeSpawn: 1.5
+  _maxTimeSpawn: 2
   _offsetXPosition: 10
   _offsetZPosition: 7.5
   _positionY: 1
@@ -511,6 +511,69 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2868adbc664e0c740812eb20989f7bf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bot
+--- !u!1 &597855355
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 597855356}
+  - component: {fileID: 597855357}
+  - component: {fileID: 597855358}
+  m_Layer: 0
+  m_Name: Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 5721338939258241955, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &597855356
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597855355}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &597855357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597855355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dbb0cd4a815b244b9396bde644f9921, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  _input: {fileID: 597855358}
+  _cameraTransform: {fileID: 963194228}
+  _moveSpeed: 20
+  _moveBounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 10, y: 1, z: 10}
+--- !u!114 &597855358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597855355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718cecf5676f98443a36621004982204, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInputSystem
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -950,7 +1013,7 @@ MonoBehaviour:
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
-  m_Antialiasing: 1
+  m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 0
@@ -982,13 +1045,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e01dbb0fd5318b14ba017c3a06c4b14f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraRotation
-  _target: {fileID: 1612269319}
-  _horizontalSensitivity: 10
-  _verticalSensitivity: 10
-  _scrollSensitivity: 10
-  _horizontalSmoothness: 10
-  _verticalSmoothness: 10
-  _scrollSmoothness: 10
+  _target: {fileID: 597855356}
+  _input: {fileID: 597855358}
+  _horizontalSensitivity: 0.5
+  _verticalSensitivity: 0.5
+  _scrollSensitivity: 2
+  _horizontalSmoothness: 1
+  _verticalSmoothness: 1
+  _scrollSmoothness: 1
   _minVerticalAngle: 15
   _maxVerticalAngle: 70
   _minDistance: 10
@@ -1005,8 +1069,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e79e839427575f748be36c5c854f8d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraMover
-  _target: {fileID: 1612269319}
-  _followSpeed: 0.3
+  _target: {fileID: 597855356}
+  _followSpeed: 10
 --- !u!1 &976946076
 GameObject:
   m_ObjectHideFlags: 0
@@ -1972,11 +2036,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2868adbc664e0c740812eb20989f7bf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bot
---- !u!4 &1612269319 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7823926476195189616, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
-  m_PrefabInstance: {fileID: 1180791263}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1629565244
 GameObject:
   m_ObjectHideFlags: 0
@@ -3038,6 +3097,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 2049427608}
   - {fileID: 963194228}
+  - {fileID: 597855356}
   - {fileID: 705507995}
   - {fileID: 1654502493}
   - {fileID: 2097102933}
