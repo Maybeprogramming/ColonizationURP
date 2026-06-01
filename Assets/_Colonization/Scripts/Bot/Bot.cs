@@ -34,5 +34,10 @@ public class Bot: MonoBehaviour, IBot
     }
 
     public void SetResourceToMine(Resource resource) =>    
-        _currentResource = resource;    
+        _currentResource = resource;
+
+    public void Init(Base cbase)
+    {
+        _base = cbase;
+    }
 }
