@@ -9,9 +9,6 @@ Shader "Custom/GrassGeometry"
         _WindSpeed ("Wind Speed", Range(0, 5)) = 1.0
         _WindStrength ("Wind Strength", Range(0, 1)) = 0.3
         _Jitter ("Height Jitter", Range(0, 1)) = 0.5
-        [Space]
-        _BendRadius ("Bend Radius", Range(0.1, 10)) = 2.0
-        _BendStrength ("Bend Strength", Range(0, 5)) = 1.0
     }
 
     SubShader
@@ -45,12 +42,6 @@ Shader "Custom/GrassGeometry"
             float _WindStrength;
             float _Jitter;
 
-            float _BendRadius;
-            float _BendStrength;
-            int _ColliderCount;
-            StructuredBuffer<float4> _ColliderPositions;
-            StructuredBuffer<float4> _ColliderVelocities;
-
             struct v2g
             {
                 uint instanceID : TEXCOORD0;
@@ -75,37 +66,6 @@ Shader "Custom/GrassGeometry"
                 return frac(sin(seed * 123.456) * 789.123);
             }
 
-            float3 GetBendOffset(float3 root, float height)
-            {
-                float3 offset = 0;
-                for (int c = 0; c < min(_ColliderCount, 16); c++)
-                {
-                    float3 colPos = _ColliderPositions[c].xyz;
-                    float3 colVel = _ColliderVelocities[c].xyz;
-                    float3 toRoot = root - colPos;
-                    toRoot.y = 0;
-                    float dist = length(toRoot);
-                    float influence = 1 - saturate(dist / _BendRadius);
-                    influence = influence * influence * influence;
-
-                    float3 away = dist > 0.001 ? normalize(toRoot) : float3(0, 0, 1);
-                    float3 posBend = away * _BendStrength * height;
-
-                    float3 velBend = 0;
-                    float velMag = length(colVel);
-                    if (velMag > 0.1)
-                    {
-                        float3 velDir = normalize(colVel);
-                        velDir.y = 0;
-                        float velFactor = saturate(velMag / 10.0);
-                        velBend = velDir * _BendStrength * height * 0.5 * velFactor;
-                    }
-
-                    offset += (posBend + velBend) * influence;
-                }
-                return offset;
-            }
-
             [maxvertexcount(12)]
             void geom(point v2g input[1], inout TriangleStream<g2f> stream)
             {
@@ -125,8 +85,7 @@ Shader "Custom/GrassGeometry"
 
                 float3 windOffset = bladeRight * wind * height;
 
-                float3 bendOffset = GetBendOffset(root, height);
-                float3 top = root + float3(0, height, 0) + windOffset + bendOffset;
+                float3 top = root + float3(0, height, 0) + windOffset;
 
                 float3 rightVectors[2];
                 rightVectors[0] = bladeRight;
@@ -210,12 +169,6 @@ Shader "Custom/GrassGeometry"
             float _WindStrength;
             float _Jitter;
 
-            float _BendRadius;
-            float _BendStrength;
-            int _ColliderCount;
-            StructuredBuffer<float4> _ColliderPositions;
-            StructuredBuffer<float4> _ColliderVelocities;
-
             struct v2g
             {
                 uint instanceID : TEXCOORD0;
@@ -238,37 +191,6 @@ Shader "Custom/GrassGeometry"
                 return frac(sin(seed * 123.456) * 789.123);
             }
 
-            float3 GetBendOffset(float3 root, float height)
-            {
-                float3 offset = 0;
-                for (int c = 0; c < min(_ColliderCount, 16); c++)
-                {
-                    float3 colPos = _ColliderPositions[c].xyz;
-                    float3 colVel = _ColliderVelocities[c].xyz;
-                    float3 toRoot = root - colPos;
-                    toRoot.y = 0;
-                    float dist = length(toRoot);
-                    float influence = 1 - saturate(dist / _BendRadius);
-                    influence = influence * influence * influence;
-
-                    float3 away = dist > 0.001 ? normalize(toRoot) : float3(0, 0, 1);
-                    float3 posBend = away * _BendStrength * height;
-
-                    float3 velBend = 0;
-                    float velMag = length(colVel);
-                    if (velMag > 0.1)
-                    {
-                        float3 velDir = normalize(colVel);
-                        velDir.y = 0;
-                        float velFactor = saturate(velMag / 10.0);
-                        velBend = velDir * _BendStrength * height * 0.5 * velFactor;
-                    }
-
-                    offset += (posBend + velBend) * influence;
-                }
-                return offset;
-            }
-
             [maxvertexcount(12)]
             void geom(point v2g input[1], inout TriangleStream<g2f> stream)
             {
@@ -288,8 +210,7 @@ Shader "Custom/GrassGeometry"
 
                 float3 windOffset = bladeRight * wind * height;
 
-                float3 bendOffset = GetBendOffset(root, height);
-                float3 top = root + float3(0, height, 0) + windOffset + bendOffset;
+                float3 top = root + float3(0, height, 0) + windOffset;
 
                 float3 rightVectors[2];
                 rightVectors[0] = bladeRight;

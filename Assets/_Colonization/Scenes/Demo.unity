@@ -136,7 +136,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &50595966
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -282,6 +282,10 @@ PrefabInstance:
       value: BotHumanoid (1)
       objectReference: {fileID: 0}
     - target: {fileID: 5105431131972748592, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
+      propertyPath: _moveSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5105431131972748592, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
       propertyPath: _offsetDistance
       value: 1
       objectReference: {fileID: 0}
@@ -348,7 +352,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5105431131972748592, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
       propertyPath: _moveSpeed
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 5105431131972748592, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
       propertyPath: _offsetDistance
@@ -557,7 +561,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   _input: {fileID: 597855358}
   _cameraTransform: {fileID: 963194228}
-  _moveSpeed: 20
+  _moveSpeed: 12
   _moveBounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 10, y: 1, z: 10}
@@ -1475,6 +1479,13 @@ MonoBehaviour:
   _bladeMesh: {fileID: 1637634168}
   _grassMaterial: {fileID: 2100000, guid: a13862d4efb47dc4787f34e36707acc1, type: 2}
   _maxViewDistance: 50
+  _bendRadius: 2
+  _bendStrength: 1
+  _trailDuration: 2
+  _interactorLayers:
+    serializedVersion: 2
+    m_Bits: 128
+  _maxColliders: 16
 --- !u!114 &1142212866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1632,7 +1643,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5105431131972748592, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
       propertyPath: _moveSpeed
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 5105431131972748592, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
       propertyPath: _offsetDistance
