@@ -1,11 +1,12 @@
 using System;
 using UnityEngine;
 
-[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class Butterfly : MonoBehaviour
 {
-    [SerializeField] private SpriteRenderer _spriteRenderer;
+    [SerializeField] private MeshRenderer _meshRenderer;
 
+    private MeshFilter _meshFilter;
     private float _speed;
     private float _lifetime;
     private float _elapsed;
@@ -13,39 +14,46 @@ public class Butterfly : MonoBehaviour
     private Bounds _bounds;
     private float _minHeight;
     private float _maxHeight;
+    private Vector3 _currentDirection;
 
     private MaterialPropertyBlock _props;
+    private static readonly int MainTexProp = Shader.PropertyToID("_MainTex");
     private static readonly int AlphaProp = Shader.PropertyToID("_Alpha");
-    private static readonly int FlapOffsetProp = Shader.PropertyToID("_FlapOffset");
+    private static readonly int ScaleProp = Shader.PropertyToID("_Scale");
 
     public event Action<Butterfly> OnDeath;
 
     private void Awake()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _meshFilter = GetComponent<MeshFilter>();
+        _meshRenderer = GetComponent<MeshRenderer>();
         _props = new MaterialPropertyBlock();
     }
 
     private void OnEnable()
     {
-        _spriteRenderer.GetPropertyBlock(_props);
+        _meshRenderer.GetPropertyBlock(_props);
     }
 
-    public void Initialize(Sprite sprite, Bounds bounds, float minHeight, float maxHeight, float speed, float lifetime)
+    public void Initialize(Sprite sprite, Bounds bounds, float minHeight, float maxHeight, float speed, float lifetime, float scale)
     {
-        _spriteRenderer.sprite = sprite;
+        _meshFilter.mesh = ButterflyMeshBuilder.Build(sprite);
+
+        _props.SetTexture(MainTexProp, sprite.texture);
+
         _bounds = bounds;
         _minHeight = minHeight;
         _maxHeight = maxHeight;
         _speed = speed;
         _lifetime = lifetime;
         _elapsed = 0;
+        _currentDirection = Vector3.forward;
 
-        float flapOffset = UnityEngine.Random.Range(0f, Mathf.PI * 2);
+        transform.rotation = Quaternion.LookRotation(_currentDirection, Vector3.up);
 
-        _props.SetFloat(FlapOffsetProp, flapOffset);
+        _props.SetFloat(ScaleProp, scale);
         _props.SetFloat(AlphaProp, 0);
-        _spriteRenderer.SetPropertyBlock(_props);
+        _meshRenderer.SetPropertyBlock(_props);
 
         ChooseNewTarget();
     }
@@ -68,7 +76,7 @@ public class Butterfly : MonoBehaviour
             alpha = (_lifetime - _elapsed) / 1f;
 
         _props.SetFloat(AlphaProp, alpha);
-        _spriteRenderer.SetPropertyBlock(_props);
+        _meshRenderer.SetPropertyBlock(_props);
 
         MoveTowardsTarget();
     }
@@ -104,8 +112,10 @@ public class Butterfly : MonoBehaviour
 
         transform.position += moveStep;
 
-        Quaternion targetRot = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
+        _currentDirection = Vector3.Slerp(_currentDirection, direction, Time.deltaTime * 2f);
+
+        if (_currentDirection.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.LookRotation(_currentDirection, Vector3.up);
     }
 
     private void ChooseNewTarget()
@@ -118,6 +128,11 @@ public class Butterfly : MonoBehaviour
         Vector3 dir = (_target - transform.position).normalized;
 
         if (dir != Vector3.zero)
-            transform.rotation = Quaternion.LookRotation(dir);
+        {
+            _currentDirection = dir;
+
+            if (_currentDirection.sqrMagnitude > 0.001f)
+                transform.rotation = Quaternion.LookRotation(_currentDirection, Vector3.up);
+        }
     }
 }

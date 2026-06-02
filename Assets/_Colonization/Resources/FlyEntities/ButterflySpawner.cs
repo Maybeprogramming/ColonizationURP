@@ -17,6 +17,7 @@ public class ButterflySpawner : MonoBehaviour
     [SerializeField] private int _maxButterflies;
     [SerializeField] private float _spawnInterval;
     [SerializeField] private int _initialCount;
+    [SerializeField] private float _globalScale;
 
     private ObjectPool<Butterfly> _pool;
     private List<Butterfly> _active;
@@ -97,7 +98,7 @@ public class ButterflySpawner : MonoBehaviour
         float speed = Random.Range(_minSpeed, _maxSpeed);
         float lifetime = Random.Range(_minLifetime, _maxLifetime);
 
-        b.Initialize(sprite, _spawnBounds, _minHeight, _maxHeight, speed, lifetime);
+        b.Initialize(sprite, _spawnBounds, _minHeight, _maxHeight, speed, lifetime, _globalScale);
     }
 
     private IEnumerator SpawnRoutine()

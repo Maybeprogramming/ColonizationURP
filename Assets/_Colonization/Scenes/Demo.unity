@@ -382,8 +382,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 260662010}
-  - component: {fileID: 260662009}
   - component: {fileID: 260662008}
+  - component: {fileID: 260662012}
+  - component: {fileID: 260662011}
   m_Layer: 0
   m_Name: Butterfly
   m_TagString: Untagged
@@ -403,24 +404,46 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c5f79d310c1572448168e9db99226d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Butterfly
-  _spriteRenderer: {fileID: 0}
---- !u!212 &260662009
-SpriteRenderer:
+  _meshRenderer: {fileID: 0}
+--- !u!4 &260662010
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260662007}
   serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &260662011
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 260662007}
+  m_Mesh: {fileID: 0}
+--- !u!23 &260662012
+MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 260662007}
   m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 0
+  m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
@@ -443,7 +466,7 @@ SpriteRenderer:
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
   m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -453,31 +476,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 0.16, y: 0.16}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
---- !u!4 &260662010
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 260662007}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &269658389
 GameObject:
   m_ObjectHideFlags: 0
@@ -609,8 +608,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ButterflySpawner
   _butterflyPrefab: {fileID: 260662008}
   _sprites:
-  - {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
-  - {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 21300000, guid: 8317944d7ed52414ebbe840c8357a22a, type: 3}
+  - {fileID: 21300000, guid: cfd31f7089c0d1a49bba655fe89bd91c, type: 3}
+  - {fileID: 21300000, guid: 1ed68cb97a801304393f3e3de0fe44c1, type: 3}
+  - {fileID: 21300000, guid: d560e0f62c150e74c99c88ce1bf4fd1e, type: 3}
+  - {fileID: 21300000, guid: 0a29c6693029f6f4589629769b901b45, type: 3}
+  - {fileID: 21300000, guid: 31c1de56f11a7ca458f5f0ef69c1846d, type: 3}
   _spawnBounds:
     m_Center: {x: 0, y: 1, z: 7}
     m_Extent: {x: 30, y: 0, z: 15}
@@ -619,10 +622,11 @@ MonoBehaviour:
   _minSpeed: 1
   _maxSpeed: 3
   _minLifetime: 10
-  _maxLifetime: 25
+  _maxLifetime: 20
   _maxButterflies: 100
   _spawnInterval: 1
   _initialCount: 25
+  _globalScale: 0.3
 --- !u!4 &325147633
 Transform:
   m_ObjectHideFlags: 0
