@@ -235,7 +235,7 @@ Transform:
   m_GameObject: {fileID: 89278471}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 4}
+  m_LocalPosition: {x: -0.61, y: 1, z: 2.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -261,8 +261,8 @@ MonoBehaviour:
   _container: {fileID: 1629565245}
   _minTimeSpawn: 1
   _maxTimeSpawn: 2
-  _offsetXPosition: 8
-  _offsetZPosition: 7
+  _offsetXPosition: 9
+  _offsetZPosition: 7.5
   _positionY: 1
   _maxCount: 10
 --- !u!1001 &160061617
@@ -473,7 +473,7 @@ GameObject:
   m_Component:
   - component: {fileID: 269658390}
   m_Layer: 0
-  m_Name: ScannerPoint
+  m_Name: CenterPointScanner
   m_TagString: Untagged
   m_Icon: {fileID: 2488908585195742037, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -488,7 +488,7 @@ Transform:
   m_GameObject: {fileID: 269658389}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -623,8 +623,8 @@ MonoBehaviour:
   _cameraTransform: {fileID: 963194228}
   _moveSpeed: 12
   _moveBounds:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 10, y: 1, z: 10}
+    m_Center: {x: 0, y: 0, z: 7}
+    m_Extent: {x: 30, y: 1, z: 15}
 --- !u!114 &597855358
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -927,13 +927,14 @@ Transform:
   m_GameObject: {fileID: 873039760}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 3.359, z: 1.907}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1542622370}
   - {fileID: 269658390}
-  m_Father: {fileID: 0}
+  - {fileID: 1081643456}
+  m_Father: {fileID: 1149502724}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &873039762
 MonoBehaviour:
@@ -948,15 +949,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _scannerPoint: {fileID: 269658390}
-  _radius: 15
+  _radius: 30
   _layerMask:
     serializedVersion: 2
     m_Bits: 64
   _timeBetweenScanning: 3
   _animator: {fileID: 1542622371}
   _isGizmosVisible: 1
-  _transparencyGizmos: 1
-  _gizmosColor: {r: 1, g: 1, b: 1, a: 0}
+  _transparencyGizmos: 0.08
+  _transparencyWireGizmos: 0.5
+  _gizmosColor: {r: 0.031372547, g: 0.38175425, b: 1, a: 0}
+  _gizmosWireColor: {r: 0.9578498, g: 0.9622642, b: 0.9577252, a: 1}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -1363,7 +1366,7 @@ GameObject:
   - component: {fileID: 1081643458}
   - component: {fileID: 1081643457}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1377,13 +1380,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1081643455}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.001, y: 3.559, z: 1.956}
-  m_LocalScale: {x: 0.16, y: 0.16, z: 0.16}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 976946077}
-  m_Father: {fileID: 1149502724}
+  m_Father: {fileID: 873039761}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!135 &1081643457
 SphereCollider:
@@ -1614,7 +1617,7 @@ Transform:
   m_Children:
   - {fileID: 1087027030}
   - {fileID: 7741249515913209188}
-  - {fileID: 1081643456}
+  - {fileID: 873039761}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1149502725
@@ -3055,8 +3058,8 @@ Transform:
   m_GameObject: {fileID: 2532416582649742154}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.998, y: 3.56, z: 5.939}
-  m_LocalScale: {x: 2, y: 1, z: 2}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1051509144410406521}
@@ -3202,7 +3205,6 @@ SceneRoots:
   - {fileID: 1654502493}
   - {fileID: 2097102933}
   - {fileID: 89278472}
-  - {fileID: 873039761}
   - {fileID: 1342380577}
   - {fileID: 1180791263}
   - {fileID: 160061617}

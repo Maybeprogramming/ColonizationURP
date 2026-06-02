@@ -13,7 +13,9 @@ public class ResourceScanner : MonoBehaviour
 
     [SerializeField] private bool _isGizmosVisible;
     [SerializeField, Range(0, 1)] private float _transparencyGizmos;
+    [SerializeField, Range(0, 1)] private float _transparencyWireGizmos;
     [SerializeField] private Color _gizmosColor;
+    [SerializeField] private Color _gizmosWireColor;
 
     private WaitForSeconds _waitTimer;
 
@@ -60,7 +62,9 @@ public class ResourceScanner : MonoBehaviour
         if (_isGizmosVisible)
         {
             Gizmos.color = new Color(_gizmosColor.r, _gizmosColor.g, _gizmosColor.b, _transparencyGizmos);
+            Gizmos.DrawSphere(_scannerPoint.position, _radius);
 
+            Gizmos.color = new Color(_gizmosWireColor.r, _gizmosWireColor.g, _gizmosWireColor.b, _transparencyWireGizmos);
             Gizmos.DrawWireSphere(_scannerPoint.position, _radius);
         }
     }
