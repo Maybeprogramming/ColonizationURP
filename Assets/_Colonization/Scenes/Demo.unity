@@ -1615,13 +1615,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _resourcesData: {fileID: 1342380576}
-  _counter: {fileID: 1149502728}
+  _stateMachine: {fileID: 0}
+  _warhouse: {fileID: 0}
   _bots:
   - {fileID: 1612269311}
   - {fileID: 573604968}
   - {fileID: 1571225932}
   - {fileID: 1111923416}
   _delayTime: 2
+  <HasConstractNewBase>k__BackingField: 0
 --- !u!65 &1149502726
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2580,7 +2582,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: COLONIZATION (URP)
+  m_text: "\u041A\u041E\u041B\u041E\u041D\u0418\u0417\u0410\u0426\u0418\u042F"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2589,8 +2591,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190210
-  m_fontColor: {r: 0.509434, g: 0, b: 0, a: 1}
+    rgba: 4278549440
+  m_fontColor: {r: 0.754717, g: 0.48330545, b: 0.017799927, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
