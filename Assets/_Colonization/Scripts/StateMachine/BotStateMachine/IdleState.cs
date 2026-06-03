@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class IdleState : IState
 {
     private readonly BotStateMachine _stateMachine;
@@ -13,7 +11,10 @@ public class IdleState : IState
 
     public void Update()
     {
-        if(_stateMachine.Bot.CurrentResource != null)        
+        if (_stateMachine.Bot.HasConstructTask)
+            _stateMachine.TransitionTo<ConstructState>();
+
+        if(_stateMachine.Bot.TargetResource != null)        
             _stateMachine.TransitionTo<WalkState>();        
     }
 }

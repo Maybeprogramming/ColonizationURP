@@ -4,37 +4,35 @@ public class WalkState : IState
 {
     private readonly BotStateMachine _stateMachine;
     private Vector3 _target;
-    private IMover _mover;
 
     public WalkState(BotStateMachine stateMachine) =>    
         _stateMachine = stateMachine;
     
     public void Enter()
     {
-        _mover = _stateMachine.Mover;
 
-        if (_stateMachine.Bot.CurrentResource != null && _stateMachine.Inventory.IsFull == false)
+        if (_stateMachine.Bot.TargetResource != null && _stateMachine.Bot.Inventory.IsFull == false)
         {
-            _target = _stateMachine.Bot.CurrentResource.transform.position;
+            _target = _stateMachine.Bot.TargetResource.transform.position;
         }
-        else if (_stateMachine.Inventory.IsFull) 
+        else if (_stateMachine.Bot.Inventory.IsFull) 
         {
-            _target = _stateMachine.Bot.CurrentBasePosition;
+            _target = _stateMachine.Bot.OwnerBasePosition;
         }
 
-        _mover.MoveTo(_target);
+        _stateMachine.Bot.Mover.MoveTo(_target);
     }
 
-    public void Exit() =>    
-        _mover.Stop();
+    public void Exit() =>
+        _stateMachine.Bot.Mover.Stop();
 
     public void Update()
     {
-        if (_mover.IsMovingComplete() && _stateMachine.Inventory.IsFull == false)
+        if (_stateMachine.Bot.Mover.IsMovingComplete() && _stateMachine.Bot.Inventory.IsFull == false)
         {
             _stateMachine.TransitionTo<GatheringState>();
         }
-        else if (_mover.IsMovingComplete() && _stateMachine.Inventory.IsFull)
+        else if (_stateMachine.Bot.Mover.IsMovingComplete() && _stateMachine.Bot.Inventory.IsFull)
         {
             _stateMachine.TransitionTo<DropState>();
         }

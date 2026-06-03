@@ -1221,13 +1221,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7823926476195189616}
-  - component: {fileID: 4200661037117245502}
-  - component: {fileID: 5059235313873727699}
-  - component: {fileID: 7049693494955838877}
-  - component: {fileID: 5105431131972748592}
-  - component: {fileID: 5973782523628098112}
   - component: {fileID: 1230466467535680748}
+  - component: {fileID: 7049693494955838877}
+  - component: {fileID: 5973782523628098112}
+  - component: {fileID: 5059235313873727699}
+  - component: {fileID: 5105431131972748592}
   - component: {fileID: 8138700282573592803}
+  - component: {fileID: 4200661037117245502}
   - component: {fileID: 5363444237903858433}
   - component: {fileID: 1588724484297689017}
   m_Layer: 7
@@ -1256,6 +1256,88 @@ Transform:
   - {fileID: 1156617312838604454}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1230466467535680748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1765154763235897707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2868adbc664e0c740812eb20989f7bf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Bot
+  _base: {fileID: 0}
+  _currentResource: {fileID: 0}
+  <HasConstructTask>k__BackingField: 0
+--- !u!114 &7049693494955838877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1765154763235897707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4c00b9d1802d31479b04b4e8dbe2c92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotStateMachine
+--- !u!114 &5973782523628098112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1765154763235897707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eace0fe42091d2b479955397eb6bce2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  _resource: {fileID: 0}
+  _container: {fileID: 1156617312838604454}
+--- !u!114 &5059235313873727699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1765154763235897707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a7eea5af5b71dc48868aafda9082b45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BotAnimator
+  _animator: {fileID: 4200661037117245502}
+  _botStateMachine: {fileID: 0}
+--- !u!114 &5105431131972748592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1765154763235897707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6693c0b94346af45aecc459452b83fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mover
+  _moveSpeed: 6
+  _offsetDistance: 1
+--- !u!114 &8138700282573592803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1765154763235897707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e04c307c4f9ad84fbde325d0d1bcdf3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ToolsProvider
+  _hummer: {fileID: 2504971832491031031}
 --- !u!95 &4200661037117245502
 Animator:
   serializedVersion: 7
@@ -1278,87 +1360,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &5059235313873727699
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1765154763235897707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a7eea5af5b71dc48868aafda9082b45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BotAnimator
-  _animator: {fileID: 4200661037117245502}
-  _botStateMachine: {fileID: 0}
---- !u!114 &7049693494955838877
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1765154763235897707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4c00b9d1802d31479b04b4e8dbe2c92, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BotStateMachine
---- !u!114 &5105431131972748592
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1765154763235897707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6693c0b94346af45aecc459452b83fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Mover
-  _moveSpeed: 6
-  _offsetDistance: 1
---- !u!114 &5973782523628098112
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1765154763235897707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eace0fe42091d2b479955397eb6bce2c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  _resource: {fileID: 0}
-  _container: {fileID: 1156617312838604454}
---- !u!114 &1230466467535680748
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1765154763235897707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2868adbc664e0c740812eb20989f7bf8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Bot
-  _base: {fileID: 0}
-  _currentResource: {fileID: 0}
---- !u!114 &8138700282573592803
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1765154763235897707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e04c307c4f9ad84fbde325d0d1bcdf3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ToolsProvider
-  _hummer: {fileID: 2504971832491031031}
 --- !u!136 &5363444237903858433
 CapsuleCollider:
   m_ObjectHideFlags: 0

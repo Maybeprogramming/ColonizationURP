@@ -1668,6 +1668,10 @@ PrefabInstance:
       propertyPath: _base
       value: 
       objectReference: {fileID: 1149502725}
+    - target: {fileID: 1230466467535680748, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
+      propertyPath: <HasConstructTask>k__BackingField
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1765154763235897707, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
       propertyPath: m_Name
       value: BotHumanoid

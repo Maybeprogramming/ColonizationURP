@@ -1,28 +1,24 @@
-using System.Collections;
 using UnityEngine;
 
-public class Inventory : MonoBehaviour
+public class Inventory : MonoBehaviour, IInventory
 {
     [SerializeField] private Resource _resource;
     [SerializeField] private Transform _container;
 
     public bool IsFull => _resource != null;
 
-    private Coroutine _animating;
-
     public void Add(Resource resource)
     {
         _resource = resource;
 
-        _animating = StartCoroutine(PlayAnimation(_container.transform.position));
         Attach(_resource);
+        SetTransform();
     }
 
-    public Resource Drop(Vector3 target)
+    public Resource Drop()
     {
         Resource resource = _resource;
-        _animating = StartCoroutine(PlayAnimation(target));
-        Detach(resource);
+        Detach(_resource);
         _resource = null;
 
         return resource;
@@ -34,12 +30,9 @@ public class Inventory : MonoBehaviour
     private static void Detach(Resource resource) =>    
         resource.gameObject.transform.parent = null;
 
-    private IEnumerator PlayAnimation(Vector3 target)
+    private void SetTransform()
     {
-        _resource.transform.position = _container.position;
-        _resource.transform.rotation = _container.rotation;
+        _resource.transform.SetPositionAndRotation(_container.position, _container.rotation);
         _resource.transform.localScale = _container.localScale;
-
-        yield return null;
     }
 }

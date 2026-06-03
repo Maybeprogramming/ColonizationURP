@@ -20,6 +20,7 @@ public class BotAnimator : MonoBehaviour
             {typeof(IdleState), nameof(IdleState) },
             {typeof(WalkState) , nameof(WalkState) },
             {typeof (GatheringState), nameof(GatheringState) },
+            {typeof(ConstructState), nameof(ConstructState) }
         };
     }
 

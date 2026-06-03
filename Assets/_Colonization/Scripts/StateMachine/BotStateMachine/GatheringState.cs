@@ -4,33 +4,33 @@ public class GatheringState : IState
 {
     private readonly BotStateMachine _stateMachine;
 
-    private float _animationDuration;
+    private float _delayTimer;
 
     public GatheringState(BotStateMachine stateMachine) =>
         _stateMachine = stateMachine;
 
     public void Enter()
     {
-        _animationDuration = 1.5f;
+        _delayTimer = 1.5f;
     }
 
     private void PickupResource()
     {
-        if (_stateMachine.Bot.CurrentResource != null && _stateMachine.Inventory.IsFull == false)
-            _stateMachine.Inventory.Add(_stateMachine.Bot.CurrentResource);
+        if (_stateMachine.Bot.TargetResource != null && _stateMachine.Bot.Inventory.IsFull == false)
+            _stateMachine.Bot.Inventory.Add(_stateMachine.Bot.TargetResource);
     }
 
     public void Exit() { }
 
     public void Update()
     {
-        _animationDuration -= Time.deltaTime;
+        _delayTimer -= Time.deltaTime;
 
-        if (_animationDuration <= 0)
+        if (_delayTimer <= 0)
         {
             PickupResource();
 
-            if (_stateMachine.Inventory.IsFull)
+            if (_stateMachine.Bot.Inventory.IsFull)
             {
                 _stateMachine.TransitionTo<WalkState>();
             }
