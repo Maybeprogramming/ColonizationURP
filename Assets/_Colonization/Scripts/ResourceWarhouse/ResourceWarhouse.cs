@@ -3,10 +3,12 @@ using UnityEngine;
 
 public class ResourceWarhouse : MonoBehaviour
 {
-    [SerializeField] private int _count;    
+    [SerializeField] private int _count; 
 
     public event Action<int> Changed;
     public event Action<int> Spend;
+
+    public int Count => _count; 
 
     private void Start()
     {

@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using CollectorBots.Scheduler;
 
-public class Base : MonoBehaviour
+[RequireComponent (typeof(BaseStateMachine), typeof(ResourceWarhouse))]
+public class Base : MonoBehaviour, IBase
 {
     [SerializeField] private ResourcesData _resourcesData;
-    [SerializeField] private ResourceWarhouse _counter;
+    [SerializeField] private BaseStateMachine _stateMachine;
+    [SerializeField] private ResourceWarhouse _warhouse;
     [SerializeField] private List<Bot> _bots;
     [SerializeField] private float _delayTime;
 
@@ -18,22 +20,28 @@ public class Base : MonoBehaviour
     public event Action<Resource> ResourceAdded;
 
     public Vector3 Position => transform.position;
+    public int ResourceCount => _warhouse.Count;
+    [field: SerializeField] public bool HasConstractNewBase { get; set; } //заглушка для реализациии 2 части проекта
 
-    private void Awake() =>    
-        _counter ??= GetComponent<ResourceWarhouse>();    
+    private void Awake() 
+    {
+        _warhouse ??= GetComponent<ResourceWarhouse>();
+        _stateMachine ??= GetComponent<BaseStateMachine>();
+    }
 
     private void Start()
     {
         _wait = new WaitForSeconds(_delayTime);
         _taskScheduler = new TaskScheduler(_bots ?? new List<Bot>());
         _working = StartCoroutine(Working());
+        _stateMachine.Init(this);
     }
 
-    private void OnDestroy() =>    
-        StopCoroutine(_working); 
+    private void OnDestroy() =>
+        StopCoroutine(_working);
 
-    public void TakeResource(Resource resource) =>    
-        OnResourceAdded(resource);    
+    public void TakeResource(Resource resource) =>
+        OnResourceAdded(resource);
 
     private void DoWork()
     {
