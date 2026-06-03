@@ -13,7 +13,7 @@ public class Bot: MonoBehaviour, IBot
     private Inventory _botInventory;
     private BotStateMachine _stateMachine;
 
-    [field: SerializeField] public bool HasConstructTask { get; set; }
+    [field: SerializeField] public bool HasConstructTask { get; set; } //Заглушка под будущее
 
     public Resource TargetResource => _targetResource;
 
@@ -29,7 +29,7 @@ public class Bot: MonoBehaviour, IBot
         _mover = GetComponent<Mover>();
         _botInventory = GetComponent<Inventory>();
         _stateMachine = GetComponent<BotStateMachine>();
-        _stateMachine.Init(this);
+        _stateMachine.SetOwnerBase(this);
     }
 
     public void GiveResource(Resource resource)
@@ -38,11 +38,11 @@ public class Bot: MonoBehaviour, IBot
         _targetResource = null;
     }
 
-    public void SetResourceToMine(Resource resource) =>    
+    public void SetTargetResource(Resource resource) =>    
         _targetResource = resource;
 
-    public void Init(Base cbase)
+    public void Init(Base ownerBase)
     {
-        _ownerBase = cbase;
+        _ownerBase = ownerBase;
     }
 }

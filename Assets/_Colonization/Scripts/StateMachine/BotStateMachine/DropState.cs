@@ -14,7 +14,7 @@ public class DropState : IState
     {
         if (_stateMachine.Bot.Inventory.IsFull == false)
         { 
-            _stateMachine.Bot.SetResourceToMine(null);
+            _stateMachine.Bot.SetTargetResource(null);
             _stateMachine.TransitionTo<IdleState>();
         }
     }

@@ -12,7 +12,9 @@ public class BotFactory : MonoBehaviour
     [ContextMenu("Instance/create")]
     private void CreateBot()
     {
-        var bot = Instantiate(_botPrefab, Position, Quaternion.identity);
+        Bot bot = Instantiate(_botPrefab, Position, Quaternion.identity);
         bot.Init(_base);
+
+        _base.AddBot(bot);
     }
 }

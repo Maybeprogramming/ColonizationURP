@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CollectorBots.Scheduler
@@ -39,11 +40,16 @@ namespace CollectorBots.Scheduler
                     break;
                 }
 
-                bot.SetResourceToMine(task.Resource);
+                bot.SetTargetResource(task.Resource);
                 assignedTasksCount++;
             }
 
             return assignedTasksCount;
+        }
+
+        public void AddBot(Bot bot)
+        {
+            _bots.Add(bot);
         }
 
         private Task GetNextTask()

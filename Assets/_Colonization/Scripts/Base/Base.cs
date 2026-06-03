@@ -7,7 +7,7 @@ using CollectorBots.Scheduler;
 public class Base : MonoBehaviour
 {
     [SerializeField] private ResourcesData _resourcesData;
-    [SerializeField] private ResourceCounter _counter;
+    [SerializeField] private ResourceWarhouse _counter;
     [SerializeField] private List<Bot> _bots;
     [SerializeField] private float _delayTime;
 
@@ -20,7 +20,7 @@ public class Base : MonoBehaviour
     public Vector3 Position => transform.position;
 
     private void Awake() =>    
-        _counter ??= GetComponent<ResourceCounter>();    
+        _counter ??= GetComponent<ResourceWarhouse>();    
 
     private void Start()
     {
@@ -28,6 +28,9 @@ public class Base : MonoBehaviour
         _taskScheduler = new TaskScheduler(_bots ?? new List<Bot>());
         _working = StartCoroutine(Working());
     }
+
+    private void OnDestroy() =>    
+        StopCoroutine(_working); 
 
     public void TakeResource(Resource resource) =>    
         OnResourceAdded(resource);    
@@ -57,5 +60,11 @@ public class Base : MonoBehaviour
             yield return _wait;
             DoWork();
         }
+    }
+
+    public void AddBot(Bot bot)
+    {
+        _bots.Add(bot);
+        _taskScheduler.AddBot(bot);
     }
 }

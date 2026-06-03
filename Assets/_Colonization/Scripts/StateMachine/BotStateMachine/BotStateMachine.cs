@@ -13,7 +13,7 @@ public class BotStateMachine : StateMachine
         TransitionTo<IdleState>();
     }
 
-    public void Init(IBot bot)
+    public void SetOwnerBase(IBot bot)
     {
         Bot = bot;
     }

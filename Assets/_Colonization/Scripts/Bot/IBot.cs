@@ -8,5 +8,5 @@ public interface IBot
     IMover Mover { get; }
     IInventory Inventory { get; }
     void GiveResource(Resource resource);
-    void SetResourceToMine(Resource resource);
+    void SetTargetResource(Resource resource);
 }
