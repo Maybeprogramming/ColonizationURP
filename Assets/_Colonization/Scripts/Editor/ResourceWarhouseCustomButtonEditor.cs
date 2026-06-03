@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(ResourceWarhouse))]
-public class CustomButtonEditor : Editor
+public class ResourceWarhouseCustomButtonEditor : Editor
 {
     [field: SerializeField] private int _spendCount;
 

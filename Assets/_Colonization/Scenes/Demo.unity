@@ -275,7 +275,7 @@ Transform:
   m_GameObject: {fileID: 196913007}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -307,7 +307,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BotFactory
   _botPrefab: {fileID: 1230466467535680748, guid: f97760cffc29ed3428630b0752f2b070, type: 3}
   _base: {fileID: 1149502725}
-  _transform: {fileID: 1516325851}
+  _transform: {fileID: 196913008}
 --- !u!1001 &197841413
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2010,37 +2010,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1494529496}
   m_CullTransparentMesh: 1
---- !u!1 &1516325850
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1516325851}
-  m_Layer: 0
-  m_Name: SpawnPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 5132851093641282708, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1516325851
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1516325850}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.69, y: 1, z: 4.21}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1542622369
 GameObject:
   m_ObjectHideFlags: 0
@@ -2662,6 +2631,72 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1804928378}
   m_CullTransparentMesh: 1
+--- !u!1 &2019285527
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2019285530}
+  - component: {fileID: 2019285529}
+  - component: {fileID: 2019285528}
+  m_Layer: 0
+  m_Name: Flowers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2019285528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2019285527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e071891123a300348a3a9080421f366d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FlowerRenderer
+  _flowerMaterial: {fileID: 2100000, guid: b64691e8901e3bc40aedd0395dd6e5e0, type: 2}
+  _maxViewDistance: 50
+--- !u!114 &2019285529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2019285527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f52778828dd709b4a9093ca2a31497c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FlowerSpawner
+  _flowerCount: 300
+  _spawnBounds:
+    m_Center: {x: 0, y: 0, z: 7}
+    m_Extent: {x: 30, y: 0, z: 15}
+  _groundLayer:
+    serializedVersion: 2
+    m_Bits: 256
+--- !u!4 &2019285530
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2019285527}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 7}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2049427606
 GameObject:
   m_ObjectHideFlags: 0
@@ -3210,6 +3245,6 @@ SceneRoots:
   - {fileID: 1753942885}
   - {fileID: 1629565245}
   - {fileID: 1142212867}
+  - {fileID: 2019285530}
   - {fileID: 196913008}
-  - {fileID: 1516325851}
   - {fileID: 325147633}

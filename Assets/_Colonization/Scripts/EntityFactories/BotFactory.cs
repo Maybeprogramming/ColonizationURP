@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class BotFactory : MonoBehaviour
 {
@@ -9,12 +10,16 @@ public class BotFactory : MonoBehaviour
 
     private Vector3 Position => _transform.position;
 
-    [ContextMenu("Instance/create")]
-    private void CreateBot()
+    public void Spawn() 
+    {
+        _base.AddBot(CreateNewBot());
+    }
+
+    private Bot CreateNewBot()
     {
         Bot bot = Instantiate(_botPrefab, Position, Quaternion.identity);
         bot.Init(_base);
 
-        _base.AddBot(bot);
+        return bot;        
     }
 }
