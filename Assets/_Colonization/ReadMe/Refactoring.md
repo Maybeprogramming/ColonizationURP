@@ -24,6 +24,8 @@
 | Low (стиль) Phase 4 | Завершено |
 | SOLID: ISP (split IBot) | Завершено |
 | SOLID: OCP (FSM ScriptableObject) | **Отложено** (хардкод переходов оставлен) |
+| Файловая структура Phase 6 | Завершено |
+| Аудит Phase 7 | **44 нарушения** задокументированы (требуют устранения) |
 
 **Главные проблемы:**
 - God Classes (`FlagPlacer` — 7 обязанностей, `Base` — 7, `BaseFactory` — 6)
@@ -426,13 +428,283 @@ FSM остаётся с хардкодом `TransitionTo<WalkState>()` / `Transi
 
 ---
 
+## Фаза 6 — Файловая структура — Выполнено
+
+**Проблема:** resource-связанный код разбросан по 6 папкам, tool-маркеры в общей `Entity/`, длинные имена папок (`EntityFactories`).
+
+**Решение:** консолидация по доменам, укорочение имён.
+
+**Структура до:**
+```
+Scripts/
+├── Base/
+├── Bot/
+├── Camera/
+├── Editor/
+├── Entity/          (Hammer, Resource)
+├── EntityFactories/ (BaseFactory, BotFactory)
+├── FSM/
+├── InputSystem/
+├── Player/
+├── Pool/            (BaseResourcePool)
+├── ResourceScanner/
+├── ResourceWarhouse/
+├── Spawner/         (SpawnerResources)
+├── GameContext.cs   (root)
+└── ResourcesData.cs (root)
+```
+
+**Структура после:**
+```
+Scripts/
+├── Base/            (Base, IBase, BaseBalance, BaseEventBinder, BaseWorkLoop, BotRoster, ExpansionController, Task, TaskScheduler)
+├── Bot/
+│   └── Tools/       (Hammer)
+├── Camera/          (CameraMover, CameraRotator)
+├── Core/            (GameContext)
+├── Editor/          (custom editors)
+├── Factories/       (BaseFactory, BotFactory)
+├── FSM/
+│   ├── BaseStateMachine/
+│   ├── BotStateMachine/
+│   └── StateMachine/
+├── InputSystem/     (PlayerInputSystem)
+├── Player/          (BaseSelector, FlagPlacer, FlagVisualProvider, GroundRaycaster, PlayerMover, SelectionRectRenderer)
+└── Resource/        ← консолидация
+    ├── Resource.cs
+    ├── ResourcesData.cs
+    ├── ResourceWarhouse.cs
+    ├── ResourceCounterView.cs
+    ├── BaseResourcePool.cs
+    ├── SpawnerResources.cs
+    └── Scanner/     (ResourceScanner, ScanAnimation, ScanAnimator)
+```
+
+**Перемещения (с сохранением .meta GUID'ов через `Move-Item` пар `.cs`+`.meta`):**
+
+| Из | В |
+|---|---|
+| `Entity/Resource.cs` | `Resource/Resource.cs` |
+| `ResourcesData.cs` (root) | `Resource/ResourcesData.cs` |
+| `Pool/BaseResourcePool.cs` | `Resource/BaseResourcePool.cs` |
+| `Spawner/SpawnerResources.cs` | `Resource/SpawnerResources.cs` |
+| `ResourceWarhouse/ResourceWarhouse.cs` | `Resource/ResourceWarhouse.cs` |
+| `ResourceWarhouse/ResourceCounterView.cs` | `Resource/ResourceCounterView.cs` |
+| `ResourceScanner/*` (3 файла) | `Resource/Scanner/*` (3 файла) |
+| `Entity/Hammer.cs` | `Bot/Tools/Hammer.cs` |
+| `EntityFactories/*` (2 файла) | `Factories/*` (2 файла, rename папки) |
+| `GameContext.cs` (root) | `Core/GameContext.cs` |
+
+**Удалённые папки:** `Entity/`, `Pool/`, `Spawner/`, `ResourceWarhouse/`, `ResourceScanner/`, `EntityFactories/` (вместе с их `.meta`).
+
+**Проверка:** `Get-ChildItem -Recurse -Filter *.cs` → 56 файлов, `*.cs.meta` → 56 файлов (все GUID'ы на месте). Scene/prefab ссылки не сломались.
+
+**Namespace:** только `Task.cs` и `TaskScheduler.cs` используют `namespace CollectorBots.Scheduler` — не зависит от путей, перенос безопасен.
+
+---
+
+## Фаза 7 — Аудит остаточных нарушений — Задокументировано
+
+**Дата:** 2026-06-05. Полный аудит проведён по `rules.md` (12 правил) и `ReadMe.md` (12 механик).
+
+### Сводка аудита
+
+| Категория | Статус | Кол-во |
+|---|---|---|
+| Задача (ReadMe.md) | ✅ 12/12 механик | 1 minor UX-баг |
+| C# правила (1-7, 11) | ⚠️ 30 нарушений | 5 правил затронуто |
+| HLSL правила (8-10) | ⚠️ 14 нарушений | 2 правила затронуто |
+| **Всего** | **44 нарушения** | **для будущего устранения** |
+
+---
+
+### A. Задача (ReadMe.md) — ✅ 12/12 реализовано
+
+| # | Механика | Файлы |
+|---|----------|-------|
+| 1.1 | 3 юнита на старте | `Base.cs:13` (prefab-configured) |
+| 1.2 | Случайная генерация | `Resource/SpawnerResources.cs:57` |
+| 1.3 | Сканирование | `Resource/Scanner/ResourceScanner.cs:47` |
+| 1.4 | Свободный юнит → сбор | `Base/TaskScheduler.cs:21` |
+| 1.5 | Физический перенос | `Bot/Inventory.cs:10` |
+| 1.6 | Счётчик ресурсов | `Resource/ResourceWarhouse.cs:13` |
+| 2.1 | 3 ресурса → новый юнит | `Base/Base.cs:85` + `BaseBalance.BotSpawnCost` |
+| 2.2 | Своя коллекция | per-base `ResourceWarhouse` |
+| 2.3 | Флаг (bounded, movable) | `Player/FlagPlacer.cs:99` + `ExpansionController` |
+| 2.4 | 5 ресурсов → новая база | `FSM/BaseStateMachine/ExpandState.cs:10` |
+| 2.5 | Флаг исчезает | `FSM/BotStateMachine/ConstructState.cs:72` |
+| 2.6 | Нельзя с 1 юнитом | `BaseStateMachine/NormalState.cs:28` |
+
+**Найденные проблемы:**
+- 🐛 **UX-баг FlagPlacer.cs:61-65** — клик по той же базе не продвигает placement (early return при `_isFollowingMouse == true`)
+- ⚠️ **Initial bots** — hardcoded в префабе, не процедурный spawn (может стартовать с 0 если префаб не настроен)
+- ⚠️ **Expansion oscillation** — при 5+ ресурсах без свободного бота `ExpandState` осциллирует per-frame
+- ⚠️ **`ResourcesData` общий** — Lock/Unlock корректно предотвращает double-assign между базами
+
+---
+
+### B. C# нарушения (30) — по правилам
+
+#### Правило 1 (Naming) — 9 нарушений
+
+| Файл | Строка | Что | Фикс |
+|---|---|---|---|
+| `Base/BaseBalance.cs` | 8 | `static readonly Vector3 BotSpawnOffset` | `const` (если возможно) или instance |
+| `Resources/FlyEntities/ButterflyMeshBuilder.cs` | 10 | `static readonly Dictionary MeshCache` | допустимо для cache utility, оставить или instance |
+| `Resources/Grass/GrassRenderer.cs` | 13, 26, 27, 40 | `_bladeMesh` (4 места) | → `_pointMesh` |
+| `Bot/Bot.cs` | 43 | `public void Init(...)` | → `Initialize(...)` |
+| `FSM/BaseStateMachine/BaseStateMachine.cs` | 7 | `public void Init(IBase tbase)` | → `Initialize(...)` + параметр `base` |
+| `Camera/CameraRotator.cs` | 74 | `private void Init()` | → `Initialize()` |
+| `Camera/CameraRotator.cs` | 25 | `private Vector2 _lookDelta` (property) | → `LookDelta` (PascalCase) |
+
+#### Правило 2 (Member Order) — 7 нарушений
+
+| Файл | Строка | Что | Фикс |
+|---|---|---|---|
+| `Resource/SpawnerResources.cs` | 19 | `_nextSpawnTime` после public | переместить выше |
+| `Core/GameContext.cs` | 33-34 | `_eventBinder`, `_startWarhouse` после public | переместить выше |
+| `FSM/StateMachine/StateMachine.cs` | 18 | `CurrentState` property между методами | сгруппировать с public |
+| `Player/FlagPlacer.cs` | 29 | `OnDestroy` до `Update` | переставить |
+| `FSM/BotStateMachine/GatheringState.cs` | 19 | `PickupResource()` между public методами | переместить после public |
+| `Resources/FlyEntities/Butterfly.cs` | 48 | `Initialize()` между OnEnable и Update | переместить после lifecycle |
+| `Resource/BaseResourcePool.cs` | 14, 16, 32, 35, 38, 41 | jumbled order | полная перестановка |
+
+#### Правило 3 (Magic numbers/strings) — 9 нарушений
+
+| Файл | Строка | Что | Фикс |
+|---|---|---|---|
+| `Base/BaseBalance.cs` | 8 | `3f` в `BotSpawnOffset` | `private const float BotSpawnForwardOffset = 3f` |
+| `Resources/FlyEntities/ButterflySpawner.cs` | 54 | `0.8f` в Color | `const` |
+| `Resources/FlyEntities/ButterflySpawner.cs` | 111 | `360f` в `Random.Range` | `const MaxRandomAngle` |
+| `Resources/FlyEntities/ButterflyMeshBuilder.cs` | 32 | `2f` (xMidRight calc) | `const` |
+| `Resources/FlyEntities/ButterflyMeshBuilder.cs` | 51 | `2f / QuadDivisions` | `const` |
+| `Resources/FlyEntities/ButterflyMeshBuilder.cs` | 87 | `"ButterflyMesh_" + sprite.name` | `$"ButterflyMesh_{sprite.name}"` |
+| `Core/GameContext.cs` | 82 | `"Ground"` GameObject name | `const string GroundName` |
+| `Player/FlagVisualProvider.cs` | 50 | `"BuildingPreview"` | `const` |
+| `Player/SelectionRectRenderer.cs` | 23, 27 | `"SelectionRect"`, `"Unlit/Color"` | `const` |
+| `Resource/ResourceCounterView.cs` | 13 | `"-"` separator | `const string CounterFormat = "- {0} -"` |
+
+#### Правило 4 (Shader.PropertyToID) — ✅ OK
+
+#### Правило 5 (Allocations) — 3 нарушения
+
+| Файл | Строка | Что | Фикс |
+|---|---|---|---|
+| `Resource/Scanner/ResourceScanner.cs` | 26 | `WaitForSeconds` в `Start` | → `Awake` |
+| `Base/BaseWorkLoop.cs` | 27 | `WaitForSeconds` в `Start` (не MonoBehaviour, но spirit) | → `ctor` |
+| `Base/Base.cs` | 74 | `() => Position` lambda captures `this` | → method group `GetPosition` |
+
+#### Правило 6 (Mesh) — 3 нарушения
+
+| Файл | Строка | Что | Фикс |
+|---|---|---|---|
+| `Resources/FlyEntities/ButterflyMeshBuilder.cs` | 87 | `"ButterflyMesh_" + ...` | `$"ButterflyMesh_{sprite.name}"` |
+| `Resources/Flawers/FlowerRenderer.cs` | 66 | `"PointMesh"` без identifier | `$"PointMesh_{name}"` |
+| `Resources/Grass/GrassRenderer.cs` | 52-70 | `CreatePointMesh` нет `mesh.name` | добавить `mesh.name = $"PointMesh_Grass"` |
+
+#### Правило 7 (Comments) — ✅ OK
+
+#### Правило 11 (Files) — ✅ OK
+
+---
+
+### C. HLSL нарушения (14) — по правилам
+
+#### Правило 8 (Structures) — ✅ OK
+
+#### Правило 9 (Local Variables) — 12 нарушений
+
+| Файл | Строки | Что | Фикс |
+|---|---|---|---|
+| `Resources/Flawers/FlowerGeometry.shader` | 93 | `EmitQuad(... a, b, c, d ...)` | dead code — удалить функцию |
+| `Resources/Flawers/FlowerGeometry.shader` | 278, 282 | `centerRight` (Pass 1, daisy) | → `centerRightDir` |
+| `Resources/Flawers/FlowerGeometry.shader` | 465, 469 | `centerRight` (Pass 1, poppy) | → `centerRightDir` |
+| `Resources/Flawers/FlowerGeometry.shader` | 664-666, 671 | `centerCamDir` (Pass 2, daisy) | → `centerViewDir` |
+| `Resources/Flawers/FlowerGeometry.shader` | 758-760, 765 | `centerCamDir` (Pass 2, poppy) | → `centerViewDir` |
+
+**Главное:** inconsistency между Pass 1 (`centerViewDir`/`centerRight`) и Pass 2 (`centerCamDir`/`centerRightDir`) в одном файле. Унифицировать.
+
+#### Правило 10 (Constants) — 2 нарушения
+
+| Файл | Строка | Что | Фикс |
+|---|---|---|---|
+| `Resources/Grass/GrassGeometry.shader` | 166 | `#define TWO_PI` после `#include` | переместить сразу после `#pragma target` |
+| `Resources/BaseModel/BaseModelPreview.shader` | 95-136 (ShadowCaster pass) | нет `#define TWO_PI` | добавить для consistency |
+
+---
+
+### D. Приоритеты для будущего устранения
+
+#### 🔴 Высокий (функциональные/архитектурные)
+
+1. **`Init` → `Initialize`** (3 файла: `Bot.cs:43`, `BaseStateMachine.cs:7`, `CameraRotator.cs:74`) — затрагивает `Base.OnBotCreated` (вызов `bot.Init`)
+2. **`Base.cs:74` lambda** — выделить `GetPosition` method group (предотвращает скрытую аллокацию closure)
+3. **`ResourceScanner.cs:26`** — `WaitForSeconds` в `Start` → `Awake` (правило 5)
+4. **UX-баг `FlagPlacer.cs:61-65`** — клик по той же базе не продвигает placement
+
+#### 🟡 Средний (массовые нарушения правил)
+
+5. **`_bladeMesh` → `_pointMesh`** (4 места в `GrassRenderer.cs`)
+6. **Magic numbers/strings → const** (10 мест)
+7. **Member order** (7 мест) — массовая перестановка
+8. **Mesh name format** (3 файла) — `$"MeshType_{identifier}"`
+9. **FlowerGeometry inconsistency** (12 мест) — унификация `centerViewDir`/`centerRightDir`
+10. **`_lookDelta` → `LookDelta`** в `CameraRotator.cs:25`
+
+#### 🟢 Низкий (косметика, dead code)
+
+11. **`EmitQuad` в `FlowerGeometry.shader:93`** — dead code, удалить
+12. **`GrassGeometry.shader:166`** — переместить `#define TWO_PI`
+13. **`BaseModelPreview.shader` Pass 2** — добавить `#define TWO_PI`
+14. **`BaseBalance.BotSpawnOffset`** — вынести `3f` в отдельный const
+15. **`static` fields** (2 места) — обсудить оставление для cache pattern
+
+---
+
+### E. План устранения (предложение)
+
+**Под-фаза 7.1** (~30 мин) — Высокий приоритет:
+- `Init` → `Initialize` (3 файла + `Base.cs:144` вызов)
+- Lambda `() => Position` → method group
+- `WaitForSeconds` в `Awake` для `ResourceScanner`
+- UX-баг `FlagPlacer`
+
+**Под-фаза 7.2** (~45 мин) — Средний приоритет:
+- `_bladeMesh` → `_pointMesh`
+- Magic numbers/strings → const (все 10 мест)
+- Member order (массовая перестановка)
+- Mesh name format
+- FlowerGeometry унификация
+
+**Под-фаза 7.3** (~15 мин) — Низкий приоритет:
+- Удалить `EmitQuad` dead code
+- `#define TWO_PI` placements
+- `BaseBalance` const refactor
+
+**Под-фаза 7.4** (~30 мин) — Ручные шаги в сцене:
+- Исправить initial bots в префабе (процедурный spawn или документировать требование)
+- Опционально: добавить `ResourcesData` per-base pool (большой рефактор)
+
+---
+
+### F. Замечания к предыдущим фазам
+
+- **Refactoring.md:155** утверждает что `Bot.IsBusy` использует `GetCurrentState` — на самом деле сейчас `CurrentState` (rename был в Phase 3.4). Требует обновления текста.
+- **Phase 3-4 считаются "Завершено"**, но аудит нашёл 30 остаточных нарушений C# правил. Либо обновить описание фазы ("частично"), либо включить их в Phase 7.
+- **Phase 3.1-3.3 считаются "Завершено"**, но аудит нашёл 14 остаточных HLSL нарушений. То же замечание.
+- **OCP отложено** — FSM с хардкодом `TransitionTo<T>()` остаётся. Документировано.
+
+---
+
 ## Порядок выполнения
 
 1. **Фаза 1 (Critical)** — ВЫПОЛНЕНО
 2. **Фаза 2 (High)** — ВЫПОЛНЕНО
-3. **Фаза 3 (правила)** — ВЫПОЛНЕНО
-4. **Фаза 4 (стиль)** — ВЫПОЛНЕНО
+3. **Фаза 3 (правила)** — ЧАСТИЧНО (30 остаточных нарушений C# + 14 HLSL)
+4. **Фаза 4 (стиль)** — ЧАСТИЧНО
 5. **Фаза 5 (SOLID: ISP)** — ВЫПОЛНЕНО
 6. **Фаза 5 (SOLID: OCP)** — отложено
+7. **Фаза 6 (Файловая структура)** — ВЫПОЛНЕНО
+8. **Фаза 7 (Аудит остаточных нарушений)** — задокументировано, ожидает устранения
 
-Все запланированные фазы (кроме OCP) выполнены. Рефакторинг завершён.
+**Все запланированные архитектурные фазы выполнены. Фазы 3-4 требуют доработки по результатам аудита (Phase 7).**
