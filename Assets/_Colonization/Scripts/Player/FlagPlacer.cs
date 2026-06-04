@@ -3,6 +3,12 @@ using UnityEngine.InputSystem;
 
 public class FlagPlacer : MonoBehaviour
 {
+    private const float SelectionRectHeight = 0.05f;
+    private const float SelectionRectYOffset = 0.51f;
+    private const float FallbackFlagScaleX = 0.5f;
+    private const float FallbackFlagScaleY = 1.5f;
+    private const float FallbackBoundsSize = 2f;
+
     [SerializeField] private Bounds _mapBounds;
     [SerializeField] private GameObject _flagPrefab;
     [SerializeField] private LayerMask _groundLayer;
@@ -47,12 +53,6 @@ public class FlagPlacer : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        if (_selectedBase != null)
-            _selectedBase.NewBaseBuilt -= RemoveFlag;
-    }
-
     private void Update()
     {
         if (Mouse.current.rightButton.wasPressedThisFrame && _selectedBase != null)
@@ -75,6 +75,28 @@ public class FlagPlacer : MonoBehaviour
             return;
     }
 
+    private void OnDestroy()
+    {
+        if (_selectedBase != null)
+            _selectedBase.NewBaseBuilt -= RemoveFlag;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(_mapBounds.center, _mapBounds.size);
+    }
+
+    public void RemoveFlag()
+    {
+        if (_selectedBase != null)
+            _selectedBase.NewBaseBuilt -= RemoveFlag;
+
+        _selectionRect.gameObject.SetActive(false);
+        _selectedBase = null;
+        ClearFlagVisual();
+    }
+
     private void CreateSelectionRect()
     {
         _selectionRect = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -89,10 +111,65 @@ public class FlagPlacer : MonoBehaviour
         _selectionRect.SetActive(false);
     }
 
-    private void OnDrawGizmosSelected()
+    private void ClearFlagVisual()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(_mapBounds.center, _mapBounds.size);
+        if (_flagVisual != null)
+            _flagVisual.SetActive(false);
+    }
+
+    private void ShowFlag(Vector3 position)
+    {
+        if (_flagPrefab != null)
+        {
+            if (_flagVisual == null)
+                _flagVisual = Instantiate(_flagPrefab);
+
+            _flagVisual.transform.position = position;
+        }
+        else
+        {
+            if (_flagVisual == null)
+            {
+                _flagVisual = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                _flagVisual.transform.localScale = new Vector3(FallbackFlagScaleX, FallbackFlagScaleY, FallbackFlagScaleX);
+                _flagVisual.name = "FlagVisual";
+            }
+
+            _flagVisual.transform.position = position;
+        }
+
+        _flagVisual.SetActive(true);
+    }
+
+    private void ShowSelectionRect()
+    {
+        Renderer baseRenderer = _selectedBase.GetComponentInChildren<Renderer>();
+        Bounds bounds = baseRenderer != null ? baseRenderer.bounds : new Bounds(_selectedBase.transform.position, Vector3.one * FallbackBoundsSize);
+        Vector3 size = bounds.size * _selectionRectScale;
+        size.y = SelectionRectHeight;
+
+        _selectionRect.transform.localScale = size;
+        _selectionRect.transform.position = new Vector3(bounds.center.x, SelectionRectYOffset, bounds.center.z);
+        _selectionMaterial.color = _selectionColor;
+        _selectionRect.SetActive(true);
+    }
+
+    private bool TryPlaceFlag(Ray ray)
+    {
+        if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue, _groundLayer) == false)
+            return false;
+
+        Vector3 position = hit.point;
+
+        if (_mapBounds.Contains(position) == false)
+            return false;
+
+        _selectedBase.FlagPosition = position;
+        _selectedBase.HasConstractNewBase = true;
+
+        ShowFlag(position);
+
+        return true;
     }
 
     private bool TrySelectBase(Ray ray)
@@ -120,76 +197,5 @@ public class FlagPlacer : MonoBehaviour
         _selectedBase.NewBaseBuilt += RemoveFlag;
         ShowSelectionRect();
         return true;
-    }
-
-    private bool TryPlaceFlag(Ray ray)
-    {
-        if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue, _groundLayer) == false)
-            return false;
-
-        Vector3 position = hit.point;
-
-        if (_mapBounds.Contains(position) == false)
-            return false;
-
-        _selectedBase.FlagPosition = position;
-        _selectedBase.HasConstractNewBase = true;
-
-        ShowFlag(position);
-
-        return true;
-    }
-
-    private void ShowFlag(Vector3 position)
-    {
-        if (_flagPrefab != null)
-        {
-            if (_flagVisual == null)
-                _flagVisual = Instantiate(_flagPrefab);
-
-            _flagVisual.transform.position = position;
-        }
-        else
-        {
-            if (_flagVisual == null)
-            {
-                _flagVisual = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                _flagVisual.transform.localScale = new Vector3(0.5f, 1.5f, 0.5f);
-                _flagVisual.name = "FlagVisual";
-            }
-
-            _flagVisual.transform.position = position;
-        }
-
-        _flagVisual.SetActive(true);
-    }
-
-    public void RemoveFlag()
-    {
-        if (_selectedBase != null)
-            _selectedBase.NewBaseBuilt -= RemoveFlag;
-
-        _selectionRect.gameObject.SetActive(false);
-        _selectedBase = null;
-        ClearFlagVisual();
-    }
-
-    private void ClearFlagVisual()
-    {
-        if (_flagVisual != null)
-            _flagVisual.SetActive(false);
-    }
-
-    private void ShowSelectionRect()
-    {
-        Renderer baseRenderer = _selectedBase.GetComponentInChildren<Renderer>();
-        Bounds bounds = baseRenderer != null ? baseRenderer.bounds : new Bounds(_selectedBase.transform.position, Vector3.one * 2f);
-        Vector3 size = bounds.size * _selectionRectScale;
-        size.y = 0.05f;
-
-        _selectionRect.transform.localScale = size;
-        _selectionRect.transform.position = new Vector3(bounds.center.x, 0.51f, bounds.center.z);
-        _selectionMaterial.color = _selectionColor;
-        _selectionRect.SetActive(true);
     }
 }
