@@ -5,9 +5,8 @@ public class FlagPlacer : MonoBehaviour
 {
     private const float SelectionRectHeight = 0.05f;
     private const float SelectionRectYOffset = 0.51f;
-    private const float FallbackFlagScaleX = 0.5f;
-    private const float FallbackFlagScaleY = 1.5f;
     private const float FallbackBoundsSize = 2f;
+    private const float PreviewScale = 0.3f;
 
     [SerializeField] private Bounds _mapBounds;
     [SerializeField] private GameObject _flagPrefab;
@@ -21,6 +20,7 @@ public class FlagPlacer : MonoBehaviour
     private GameObject _flagVisual;
     private Camera _camera;
     private Material _selectionMaterial;
+    private bool _isFollowingMouse;
 
     private void Awake()
     {
@@ -63,6 +63,9 @@ public class FlagPlacer : MonoBehaviour
             return;
         }
 
+        if (_isFollowingMouse)
+            UpdatePreviewPosition();
+
         if (Mouse.current.leftButton.wasPressedThisFrame == false)
             return;
 
@@ -79,6 +82,9 @@ public class FlagPlacer : MonoBehaviour
     {
         if (_selectedBase != null)
             _selectedBase.NewBaseBuilt -= RemoveFlag;
+
+        if (_flagVisual != null)
+            Destroy(_flagVisual);
     }
 
     private void OnDrawGizmosSelected()
@@ -93,8 +99,9 @@ public class FlagPlacer : MonoBehaviour
             _selectedBase.NewBaseBuilt -= RemoveFlag;
 
         _selectionRect.gameObject.SetActive(false);
-        _selectedBase = null;
         ClearFlagVisual();
+        _isFollowingMouse = false;
+        _selectedBase = null;
     }
 
     private void CreateSelectionRect()
@@ -117,28 +124,52 @@ public class FlagPlacer : MonoBehaviour
             _flagVisual.SetActive(false);
     }
 
-    private void ShowFlag(Vector3 position)
+    private void EnsureFlagVisual()
     {
+        if (_flagVisual != null)
+            return;
+
         if (_flagPrefab != null)
         {
-            if (_flagVisual == null)
-                _flagVisual = Instantiate(_flagPrefab);
-
-            _flagVisual.transform.position = position;
+            _flagVisual = Instantiate(_flagPrefab);
         }
         else
         {
-            if (_flagVisual == null)
-            {
-                _flagVisual = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                _flagVisual.transform.localScale = new Vector3(FallbackFlagScaleX, FallbackFlagScaleY, FallbackFlagScaleX);
-                _flagVisual.name = "FlagVisual";
-            }
+            _flagVisual = new GameObject("BuildingPreview");
+            _flagVisual.transform.localScale = Vector3.one * PreviewScale;
 
-            _flagVisual.transform.position = position;
+            MeshFilter meshFilter = _flagVisual.AddComponent<MeshFilter>();
+            meshFilter.sharedMesh = Resources.Load<Mesh>("BuildingBarn/MeshBuildingBarn");
+
+            MeshRenderer meshRenderer = _flagVisual.AddComponent<MeshRenderer>();
+            meshRenderer.sharedMaterial = Resources.Load<Material>("BaseModel/BasePreview");
         }
 
+        _flagVisual.SetActive(false);
+    }
+
+    private void UpdatePreviewPosition()
+    {
+        Ray ray = _camera.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+        if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue, _groundLayer) == false)
+            return;
+
+        Vector3 position = hit.point;
+
+        if (_mapBounds.Contains(position) == false)
+            return;
+
+        _flagVisual.transform.position = position;
         _flagVisual.SetActive(true);
+    }
+
+    private void ShowFlag(Vector3 position)
+    {
+        EnsureFlagVisual();
+        _flagVisual.transform.position = position;
+        _flagVisual.SetActive(true);
+        _isFollowingMouse = false;
     }
 
     private void ShowSelectionRect()
@@ -183,7 +214,16 @@ public class FlagPlacer : MonoBehaviour
             return false;
 
         if (clickedBase == _selectedBase)
+        {
+            if (_isFollowingMouse == false)
+            {
+                EnsureFlagVisual();
+                _isFollowingMouse = true;
+                UpdatePreviewPosition();
+            }
+
             return true;
+        }
 
         if (_selectedBase != null)
         {
@@ -191,11 +231,15 @@ public class FlagPlacer : MonoBehaviour
             _selectedBase.HasConstractNewBase = false;
             _selectedBase.CancelConstructTasks();
             ClearFlagVisual();
+            _isFollowingMouse = false;
         }
 
         _selectedBase = clickedBase;
         _selectedBase.NewBaseBuilt += RemoveFlag;
         ShowSelectionRect();
+        EnsureFlagVisual();
+        _isFollowingMouse = true;
+        UpdatePreviewPosition();
         return true;
     }
 }
