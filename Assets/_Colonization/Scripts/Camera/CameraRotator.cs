@@ -51,7 +51,7 @@ public class CameraRotator : MonoBehaviour
 
     private void HandleRotation()
     {
-        if (_input.IsRightMousePressed)
+        if (_input.IsMiddleMousePressed)
         {
             _targetHorizontal += _lookDelta.x * _horizontalSensitivity;
             _targetVertical -= _lookDelta.y * _verticalSensitivity;

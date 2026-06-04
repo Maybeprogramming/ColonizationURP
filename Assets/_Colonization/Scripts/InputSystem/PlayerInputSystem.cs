@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 public class PlayerInputSystem : MonoBehaviour
@@ -8,7 +9,7 @@ public class PlayerInputSystem : MonoBehaviour
 
     public Vector3 MoveDirection => GetDirection();
     public Vector2 LookDelta => _inputSystem.Player.Look.ReadValue<Vector2>();
-    public bool IsRightMousePressed => _inputSystem.UI.RightClick.IsPressed();
+    public bool IsMiddleMousePressed => Mouse.current.middleButton.isPressed;
     public Vector2 ScrollDelta => _inputSystem.UI.ScrollWheel.ReadValue<Vector2>();
 
     private void Awake()

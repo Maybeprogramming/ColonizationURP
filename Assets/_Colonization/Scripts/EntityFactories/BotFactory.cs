@@ -2,12 +2,16 @@ using UnityEngine;
 
 public class BotFactory : MonoBehaviour
 {
+    private const float SpawnOffsetZ = 3f;
+
     [SerializeField] private Bot _botPrefab;
     [SerializeField] private Base _base;
 
     [SerializeField] private Transform _spawnTransform;
 
-    private Vector3 Position => _spawnTransform != null ? _spawnTransform.position : _base.transform.position;
+    private Vector3 Position => _spawnTransform != null
+        ? _spawnTransform.position
+        : _base.transform.position + new Vector3(0f, 0f, SpawnOffsetZ);
 
     public void Initialize(Base ownerBase)
     {

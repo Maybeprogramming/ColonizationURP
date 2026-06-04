@@ -7,14 +7,21 @@ public class FlagPlacer : MonoBehaviour
     [SerializeField] private GameObject _flagPrefab;
     [SerializeField] private LayerMask _groundLayer;
     [SerializeField] private LayerMask _baseLayer;
+    [SerializeField] private GameObject _selectionRect;
+    [SerializeField] private Color _selectionColor = Color.red;
+    [SerializeField, Range(0f, 3f)] private float _selectionRectScale = 1.2f;
 
     private Base _selectedBase;
     private GameObject _flagVisual;
     private Camera _camera;
+    private Material _selectionMaterial;
 
     private void Awake()
     {
         _camera = Camera.main;
+
+        if (_selectionRect == null)
+            CreateSelectionRect();
 
         if (_mapBounds.size == Vector3.zero)
         {
@@ -68,6 +75,20 @@ public class FlagPlacer : MonoBehaviour
             return;
     }
 
+    private void CreateSelectionRect()
+    {
+        _selectionRect = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        _selectionRect.name = "SelectionRect";
+        _selectionRect.transform.SetParent(transform, false);
+
+        MeshRenderer meshRenderer = _selectionRect.GetComponent<MeshRenderer>();
+        _selectionMaterial = new Material(Shader.Find("Unlit/Color"));
+        _selectionMaterial.color = _selectionColor;
+        meshRenderer.material = _selectionMaterial;
+
+        _selectionRect.SetActive(false);
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
@@ -97,6 +118,7 @@ public class FlagPlacer : MonoBehaviour
 
         _selectedBase = clickedBase;
         _selectedBase.NewBaseBuilt += RemoveFlag;
+        ShowSelectionRect();
         return true;
     }
 
@@ -147,6 +169,7 @@ public class FlagPlacer : MonoBehaviour
         if (_selectedBase != null)
             _selectedBase.NewBaseBuilt -= RemoveFlag;
 
+        _selectionRect.gameObject.SetActive(false);
         _selectedBase = null;
         ClearFlagVisual();
     }
@@ -155,5 +178,18 @@ public class FlagPlacer : MonoBehaviour
     {
         if (_flagVisual != null)
             _flagVisual.SetActive(false);
+    }
+
+    private void ShowSelectionRect()
+    {
+        Renderer baseRenderer = _selectedBase.GetComponentInChildren<Renderer>();
+        Bounds bounds = baseRenderer != null ? baseRenderer.bounds : new Bounds(_selectedBase.transform.position, Vector3.one * 2f);
+        Vector3 size = bounds.size * _selectionRectScale;
+        size.y = 0.05f;
+
+        _selectionRect.transform.localScale = size;
+        _selectionRect.transform.position = new Vector3(bounds.center.x, 0.51f, bounds.center.z);
+        _selectionMaterial.color = _selectionColor;
+        _selectionRect.SetActive(true);
     }
 }
