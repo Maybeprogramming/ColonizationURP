@@ -1,15 +1,9 @@
 using UnityEngine;
 
-public interface IBot
+public interface IBot : IMovable, IGatherer, IConstructor
 {
-    Vector3 OwnerBasePosition { get; }
-    Resource TargetResource { get; }
-    bool HasConstructTask { get; set; }
-    Vector3 ConstructTargetPosition { get; set; }
-    IMover Mover { get; }
-    IInventory Inventory { get; }
+    bool IsBusy { get; }
     IBase OwnerBase { get; }
-    void GiveResource(Resource resource);
-    void SetTargetResource(Resource resource);
+    Vector3 OwnerBasePosition { get; }
     void SwitchBase(IBase newBase);
 }

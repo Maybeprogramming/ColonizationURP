@@ -8,16 +8,22 @@
 | High: 2.0 GameContext | Завершено |
 | High: 2.1 FlagPlacer | Завершено |
 | High: 2.2 Base decompose | Завершено |
-| High: 2.3 / 2.5 | Фаза 2 (осталось) |
+| High: 2.3 Base ↔ BotFactory cycle | Завершено (event pattern) |
 | High: 2.4 Constants | Завершено |
+| High: 2.5 BaseFactory.Spawn dedup | Завершено |
 | High: 2.6 Command methods | Завершено |
 | High: 2.7 IsBusy interface | Завершено |
 | High: 2.8 IBase | Завершено |
 | High: 2.9 GC pressure | Завершено |
 | Medium: 3.1–3.3 HLSL | Завершено |
-| Medium: 3.4 typos/naming | Завершено (кроме folder rename) |
-| Medium: 3.5+ | Фаза 3 (осталось) |
-| Low (стиль, 6+) | Фаза 4 |
+| Medium: 3.4 typos/naming | Завершено (folder rename + Hummer→Hammer) |
+| Medium: 3.5 member order | Завершено |
+| Medium: 3.6 magic numbers | Завершено |
+| Medium: 3.7 allocations | Завершено |
+| Medium: 3.8 mesh naming | Завершено |
+| Low (стиль) Phase 4 | Завершено |
+| SOLID: ISP (split IBot) | Завершено |
+| SOLID: OCP (FSM ScriptableObject) | **Отложено** (хардкод переходов оставлен) |
 
 **Главные проблемы:**
 - God Classes (`FlagPlacer` — 7 обязанностей, `Base` — 7, `BaseFactory` — 6)
@@ -135,10 +141,32 @@
 
 ---
 
-## Оставшиеся High (2.3, 2.5)
+## Фаза 2.3 + 2.5 — Выполнено
 
-- **2.3** Цикл `Base._botFactory ↔ BotFactory._base` — событийный паттерн или mediator (не сделано)
-- **2.5** Дублирование wiring в `BaseFactory.Spawn` — частично решено `BaseEventBinder`, осталась декомпозиция (не сделано)
+### 2.3 Разрыв цикла `Base ↔ BotFactory`
+
+**Проблема:** `Base._botFactory` → `BotFactory`, `BotFactory._base` → `Base`. Циклическая ссылка, порядок инициализации критичен.
+
+**Решение:** событийный паттерн. `BotFactory` больше не знает о `Base`.
+
+**Изменения:**
+- `BotFactory.cs` (22 строки): удалены `[SerializeField] _base`, `Initialize(Base)`, `_base` usage в `Position`/`Spawn`. Добавлен `public event Action<Bot> BotCreated`. `Spawn()` создаёт бота в `Vector3.zero` и фаерит событие.
+- `Base.cs`: добавлены `OnEnable`/`OnDisable` подписка/отписка на `_botFactory.BotCreated`. `SetBotFactory` переподписывается (unsubscribe old → set → subscribe new). `OnBotCreated` инициализирует бота (`bot.Init(this, BaseFactory)`) и добавляет в roster.
+- `BaseFactory.Spawn`: удалён `botFactory.Initialize(newBase)`.
+- `Base.OnBotCreated` ставит позицию: `bot.transform.position = transform.position + BaseBalance.BotSpawnOffset` (offset (0, 0, 3)).
+- `BaseBalance.BotSpawnOffset = (0, 0, 3f)` — константа в `BaseBalance.cs`.
+- `Demo.unity`: убраны устаревшие `_base: {fileID: ...}` и `_spawnTransform: {fileID: 0}` из BotFactory MonoBehaviour.
+
+**Почему Base позиционирует бота, а не BotFactory:** `EntityFactory` (где живёт BotFactory-template) — root GameObject в сцене на world (0, 1, 0), **не** child стартовой базы. `transform.position` template-а не совпадает с позицией базы. Base знает свою позицию, Base позиционирует бота.
+
+### 2.5 Декомпозиция `BaseFactory.Spawn`
+
+**Изменения:**
+- `BaseFactory.cs` (85 строк, было 85 но `Spawn` стал 9-строчным оркестратором):
+  - `HasDependency(Object, string, string)` — единый helper для null-check (заменил 4 копии)
+  - `InstantiateBase(Vector3)` — создание базы + random name
+  - `ConfigureBaseChildren(Base)` — уничтожение клонов ботов, замена BotFactory, активация ResourceScanner
+  - `Spawn(Vector3)` — оркестратор: 4 проверки → создание → конфигурация → биндинг
 
 ---
 
@@ -163,12 +191,34 @@
 - `HasConstractNewBase` → `HasConstructNewBase` (везде: IBase, Base, ExpansionController, NormalState, ExpandState)
 - `IStateMachine.GetCurrentState` → `CurrentState` (правило 1, без `Get` префикса)
 
-### Не сделано
-- **3.4 folder rename** `BaseStateMashine` → `BaseStateMachine` — лучше делать в редакторе Unity (сохранение .meta GUID'ов)
-- **3.5** member order в нескольких файлах (CameraRotator имеет 2 группы [SerializeField])
-- **3.6** магические числа (GatheringState delay 1.5f и т.д.)
-- **3.7** аллокации (PlayerInputSystem ReadValue<Vector2> 2 раза, ScanAnimation.material.color)
-- **3.8** mesh naming (GrassRenderer.CreateTriangleMesh → CreatePointMesh)
+### Phase 3.4–3.8 + Phase 4 — Выполнено
+
+#### 3.4 folder rename + Hummer→Hammer
+- `Scripts/FSM/BaseStateMashine/` → `BaseStateMachine/` (через `Rename-Item`, .meta GUID'ы сохранены)
+- `Hummer.cs` → `Hammer.cs` (класс, файл, .meta с тем же GUID `66658c3e...d22e`)
+- `ToolsProvider._hummer` → `_hammer` с `[FormerlySerializedAs("_hummer")]` для миграции serialized data
+- `m_EditorClassIdentifier: Assembly-CSharp::Hummer` → `Hammer` в `Hammer.prefab` + `BotHumanoid.prefab`
+
+#### 3.5 member order
+- `Base.cs`: properties → events (публичные свойства перед events)
+- `CameraRotator.cs`: `GetOffset` (public) перед private `Handle*` методами
+- `ResourceWarhouse.cs`: property `Count` → events → public methods → private `OnChangeCount`; убран пустой `Start()`
+
+#### 3.6 magic numbers
+- `GatheringState.PickupDelay = 1.5f` — именованная константа
+
+#### 3.7 allocations
+- `PlayerInputSystem.GetDirection`: кеш `ReadValue<Vector2>()` в локальную переменную
+- `ScanAnimation.EnsureMaterials()`: ленивый кеш `_materialCircle1/2/3` (устраняет повторный `renderer.material` instancing)
+
+#### 3.8 mesh naming
+- `GrassRenderer.CreateTriangleMesh` → `CreatePointMesh`
+
+#### Phase 4 стиль
+- `CameraRotator.GetOffset`: `Vector3.zero.z` → `0f`
+- `SpawnerResources.OnDrawGizmosSelected`: `Vector3.one.y` → `1f`
+- `ButterflyMeshBuilder.BuildInternal`: `new Vector3(..., 0, ...)` → `0f` (8 мест)
+- `Mover.Position` удалён (dead code, не используется через `IMover`)
 
 ---
 
@@ -338,23 +388,51 @@ public class GameContext : MonoBehaviour
 
 ## SOLID (итог)
 
-| Принцип | Цель |
-|---|---|
-| S (SRP) | Разделить `FlagPlacer`, `Base`, `BaseFactory` |
-| O (OCP) | FSM с хардкодом → ScriptableObject со списком состояний |
-| L (LSP) | `Bot.IsBusy`, `IBot.OwnerBase` → интерфейсы |
-| I (ISP) | `IBot` — 15 членов → `IMovable`, `IGatherer`, `IConstructor` |
-| D (DIP) | Конкретные классы → интерфейсы + DI через `GameContext`/Inspector |
+| Принцип | Цель | Статус |
+|---|---|---|
+| S (SRP) | Разделить `FlagPlacer`, `Base`, `BaseFactory` | Завершено (Фазы 2.1, 2.2) |
+| O (OCP) | FSM с хардкодом → ScriptableObject со списком состояний | **Отложено** (хардкод `TransitionTo<T>()` оставлен) |
+| L (LSP) | `Bot.IsBusy`, `IBot.OwnerBase` → интерфейсы | Завершено (Фазы 2.7, 2.8) |
+| I (ISP) | `IBot` — 12 членов → `IMovable`, `IGatherer`, `IConstructor` | Завершено (Фаза 5) |
+| D (DIP) | Конкретные классы → интерфейсы + DI через `GameContext`/Inspector | Частично (GameContext + IBase, IBot, IInventory, IMover) |
+
+---
+
+## Фаза 5 — SOLID: ISP — Выполнено
+
+**Проблема:** `IBot` — 12 членов, нарушение Interface Segregation Principle. Потребители зависят от методов, которые не используют (states используют подмножества, `BotRoster` использует только `HasConstructTask`, `TaskScheduler` — только `SetTargetResource`).
+
+**Решение:** ISP-сплит `IBot` на три ролевых интерфейса. `IBot` остаётся как композиция для удобства.
+
+**Новые файлы:**
+- `Scripts/Bot/IMovable.cs` — `IMover Mover { get; }`
+- `Scripts/Bot/IGatherer.cs` — `Resource TargetResource { get; }`, `IInventory Inventory { get; }`, `void GiveResource(Resource)`, `void SetTargetResource(Resource)`
+- `Scripts/Bot/IConstructor.cs` — `bool HasConstructTask { get; set; }`, `Vector3 ConstructTargetPosition { get; set; }`
+
+**Изменённые файлы:**
+- `Scripts/Bot/IBot.cs`: `interface IBot : IMovable, IGatherer, IConstructor { bool IsBusy { get; } IBase OwnerBase { get; } Vector3 OwnerBasePosition { get; } void SwitchBase(IBase) }`
+- `Bot.cs`: без изменений — `Bot` уже реализует все члены, transitively implements все три интерфейса через `IBot`
+
+**Потребители (без изменений):**
+- `BotRoster` хранит `List<Bot>` (конкретный тип), лямбды используют `bot.HasConstructTask` — работает, т.к. `Bot` реализует `IConstructor`
+- `TaskScheduler` хранит `IReadOnlyList<Bot>`, вызывает `bot.SetTargetResource(...)` — работает, т.к. `Bot` реализует `IGatherer`
+- States (`IdleState`, `WalkState`, `GatheringState`, `DropState`, `ConstructState`) используют `_stateMachine.Bot` (`IBot`) — работает, т.к. `IBot` transitively содержит все члены
+
+**Выгода:** структурная — интерфейсы задокументированы, будущие потребители могут зависеть от узких ролей. `IMovable` для навигации, `IGatherer` для экономики, `IConstructor` для строительства.
+
+### OCP — отложено
+
+FSM остаётся с хардкодом `TransitionTo<WalkState>()` / `TransitionTo<IdleState>()` и т.д. ScriptableObject-конфиг переходов не реализован — текущий масштаб (5 состояний) не оправдывает overhead конфигурации.
 
 ---
 
 ## Порядок выполнения
 
 1. **Фаза 1 (Critical)** — ВЫПОЛНЕНО
-2. **Фаза 2 (High)** — декомпозиция God Classes + `GameContext`, ~3-4 часа
-3. **Фаза 3 (правила)** — массовые rename и перестановки, ~1 час
-4. **Фаза 4 (стиль)** — косметика, по возможности
+2. **Фаза 2 (High)** — ВЫПОЛНЕНО
+3. **Фаза 3 (правила)** — ВЫПОЛНЕНО
+4. **Фаза 4 (стиль)** — ВЫПОЛНЕНО
+5. **Фаза 5 (SOLID: ISP)** — ВЫПОЛНЕНО
+6. **Фаза 5 (SOLID: OCP)** — отложено
 
-Каждый этап — отдельный коммит с пометкой `[REFACTOR]`. Тесты после каждой фазы.
-
-**Рекомендация:** Фазу 2 начать с **подфазы 2.0 (GameContext)** — это уберёт все fallback'и и даст чистую основу для декомпозиции.
+Все запланированные фазы (кроме OCP) выполнены. Рефакторинг завершён.
