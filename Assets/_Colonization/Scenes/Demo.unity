@@ -1123,7 +1123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraMover
   _target: {fileID: 597855356}
-  _followSpeed: 20
+  _followSpeed: 50
 --- !u!1 &976946076
 GameObject:
   m_ObjectHideFlags: 0
