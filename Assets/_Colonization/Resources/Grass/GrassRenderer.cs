@@ -24,7 +24,7 @@ public class GrassRenderer : MonoBehaviour
         _propertyBlock = new MaterialPropertyBlock();
 
         if (_bladeMesh == null)
-            _bladeMesh = CreateTriangleMesh();
+            _bladeMesh = CreatePointMesh();
 
         _renderBounds = new Bounds(transform.position, Vector3.one * _maxViewDistance * BoundsMultiplier);
     }
@@ -49,7 +49,7 @@ public class GrassRenderer : MonoBehaviour
         );
     }
 
-    private Mesh CreateTriangleMesh()
+    private Mesh CreatePointMesh()
     {
         Mesh mesh = new Mesh();
 

@@ -16,50 +16,60 @@ public class ScanAnimation : MonoBehaviour
     [SerializeField] private float _defaultTransparency;
     [SerializeField] private float _scaleMultiplier;
 
+    private Material _materialCircle1;
+    private Material _materialCircle2;
+    private Material _materialCircle3;
+
     public void Run()
     {
+        EnsureMaterials();
         Reset();
 
         DoScale(_scaleEntity);
-        DoFadeColor(_rendererCircle1);
-        DoFadeColor(_rendererCircle2);
-        DoFadeColor(_rendererCircle3);
+        DoFadeColor(_materialCircle1);
+        DoFadeColor(_materialCircle2);
+        DoFadeColor(_materialCircle3);
     }
 
-    public void Stop() =>    
-        Reset();    
+    public void Stop()
+    {
+        EnsureMaterials();
+        Reset();
+    }
+
+    private void EnsureMaterials()
+    {
+        if (_materialCircle1 == null) _materialCircle1 = _rendererCircle1.material;
+        if (_materialCircle2 == null) _materialCircle2 = _rendererCircle2.material;
+        if (_materialCircle3 == null) _materialCircle3 = _rendererCircle3.material;
+    }
 
     private void Reset()
     {
         ResetScale(_scaleEntity);
-        ResetMeshRenderer();        
+        ResetMaterial(_materialCircle1);
+        ResetMaterial(_materialCircle2);
+        ResetMaterial(_materialCircle3);
     }
 
-    private void ResetMeshRenderer()
-    {
-        ResetMaterial(_rendererCircle1);
-        ResetMaterial(_rendererCircle2);
-        ResetMaterial(_rendererCircle3);
-    }
-
-    private void ResetMaterial(MeshRenderer renderer) =>
-        renderer.material.DOKill();
+    private void ResetMaterial(Material material) =>
+        material.DOKill();
 
     private void ResetScale(Transform entity) =>
         entity.DOKill();
 
-    private void DoFadeColor(MeshRenderer renderer)
+    private void DoFadeColor(Material material)
     {
-        ResetColor(renderer);
-        renderer.material.DOFade(_transparency, _duration).SetDelay(_delayTime).SetEase(_ease).SetLoops(_repeatCount);
+        ResetColor(material);
+        material.DOFade(_transparency, _duration).SetDelay(_delayTime).SetEase(_ease).SetLoops(_repeatCount);
     }
 
     private void DoScale(Transform entity)
     {
         _scaleEntity.localScale = Vector3.one * _scaleMultiplier;
-        entity.DOScale(_scaleVector, _duration).SetDelay(_delayTime).SetEase(_ease).SetLoops(_repeatCount); 
+        entity.DOScale(_scaleVector, _duration).SetDelay(_delayTime).SetEase(_ease).SetLoops(_repeatCount);
     }
- 
-    private void ResetColor(MeshRenderer renderer) =>    
-        renderer.material.color = new Color(renderer.material.color.r, renderer.material.color.g, renderer.material.color.b, _defaultTransparency);
+
+    private void ResetColor(Material material) =>
+        material.color = new Color(material.color.r, material.color.g, material.color.b, _defaultTransparency);
 }

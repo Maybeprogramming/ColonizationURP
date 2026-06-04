@@ -102,4 +102,4 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 66658c3ed0d4bbc40bae59c9b034d22e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Hummer
+  m_EditorClassIdentifier: Assembly-CSharp::Hammer

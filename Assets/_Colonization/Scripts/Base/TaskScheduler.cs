@@ -1,24 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace CollectorBots.Scheduler
 {
     public class TaskScheduler
     {
-        private readonly List<Task> _tasks;
-        private readonly List<Bot> _bots;
+        private readonly IReadOnlyList<Bot> _bots;
+        private readonly List<Task> _tasks = new List<Task>();
 
-        public TaskScheduler(IEnumerable<Bot> bots)
+        public TaskScheduler(IReadOnlyList<Bot> bots)
         {
-            _tasks = new List<Task>();
-            _bots = new List<Bot>(bots);
+            _bots = bots;
         }
 
         public int PendingTasksCount => _tasks.Count;
 
-        public void AddTask(Task task) =>        
-            _tasks.Add(task);        
+        public void AddTask(Task task) =>
+            _tasks.Add(task);
 
         public int AssignTasks()
         {
@@ -45,16 +43,6 @@ namespace CollectorBots.Scheduler
             }
 
             return assignedTasksCount;
-        }
-
-        public void AddBot(Bot bot)
-        {
-            _bots.Add(bot);
-        }
-
-        public void RemoveBot(Bot bot)
-        {
-            _bots.Remove(bot);
         }
 
         private Task GetNextTask()

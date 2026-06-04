@@ -9,8 +9,8 @@ public class ResourcesData : MonoBehaviour
 
     private void Start()
     {
-        _resourcesAvailable = new List<Resource>();
-        _resourcesReserved = new List<Resource>();
+        _resourcesAvailable ??= new List<Resource>();
+        _resourcesReserved ??= new List<Resource>();
     }
 
     public bool TryGetResource(out Resource resource)

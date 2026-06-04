@@ -2,61 +2,84 @@ using UnityEngine;
 
 public class BaseFactory : MonoBehaviour
 {
+    private const int BaseNameMin = 1000;
+    private const int BaseNameMax = 9999;
+
     [SerializeField] private Base _basePrefab;
-    [SerializeField] private ResourcesData _resourcesData;
-    [SerializeField] private SpawnerResources _spawner;
     [SerializeField] private BotFactory _botFactoryTemplate;
 
-    public Base Spawn(Vector3 position, Base previousBase)
-    {
-        if (_basePrefab == null)
-            _basePrefab = Object.FindFirstObjectByType<Base>();
+    private ResourcesData _resourcesData;
+    private SpawnerResources _spawner;
+    private BaseEventBinder _eventBinder;
 
-        if (_botFactoryTemplate == null)
-            _botFactoryTemplate = Object.FindFirstObjectByType<BotFactory>();
+    private void Awake()
+    {
+        _resourcesData = GameContext.ResourcesData;
+        _spawner = GameContext.Spawner;
 
         if (_resourcesData == null)
-            _resourcesData = Object.FindFirstObjectByType<ResourcesData>();
+            Debug.LogError($"{nameof(BaseFactory)} on '{name}': {nameof(_resourcesData)} is not assigned. Add {nameof(GameContext)} to scene.", this);
 
         if (_spawner == null)
-            _spawner = Object.FindFirstObjectByType<SpawnerResources>();
+            Debug.LogError($"{nameof(BaseFactory)} on '{name}': {nameof(_spawner)} is not assigned. Add {nameof(GameContext)} to scene.", this);
+
+        if (_botFactoryTemplate == null)
+            Debug.LogError($"{nameof(BaseFactory)} on '{name}': {nameof(_botFactoryTemplate)} is not assigned.", this);
+
+        _eventBinder = new BaseEventBinder(_resourcesData, _spawner);
+    }
+
+    public Base Spawn(Vector3 position)
+    {
+        if (!HasDependency(_basePrefab, nameof(_basePrefab), string.Empty)) return null;
+        if (!HasDependency(_botFactoryTemplate, nameof(_botFactoryTemplate), string.Empty)) return null;
+        if (!HasDependency(_resourcesData, nameof(_resourcesData), $"Check {nameof(GameContext)}.")) return null;
+        if (!HasDependency(_spawner, nameof(_spawner), $"Check {nameof(GameContext)}.")) return null;
 
         Vector3 spawnPosition = position;
         spawnPosition.y = 0f;
 
+        Base newBase = InstantiateBase(spawnPosition);
+        ConfigureBaseChildren(newBase);
+        _eventBinder.Bind(newBase);
+
+        return newBase;
+    }
+
+    private Base InstantiateBase(Vector3 spawnPosition)
+    {
         Base newBase = Instantiate(_basePrefab, spawnPosition, Quaternion.identity);
+        newBase.name = $"Base_{Random.Range(BaseNameMin, BaseNameMax)}";
+        return newBase;
+    }
 
-        newBase.name = $"Base_{Random.Range(1000, 9999)}";
-
+    private void ConfigureBaseChildren(Base newBase)
+    {
         Bot[] clonedBots = newBase.GetComponentsInChildren<Bot>();
 
         for (int i = 0; i < clonedBots.Length; i++)
             Destroy(clonedBots[i].gameObject);
 
+        BotFactory existingBotFactory = newBase.GetComponentInChildren<BotFactory>();
+
+        if (existingBotFactory != null && existingBotFactory.gameObject != _botFactoryTemplate.gameObject)
+            Destroy(existingBotFactory.gameObject);
+
         BotFactory botFactory = Instantiate(_botFactoryTemplate, newBase.transform);
-        botFactory.Initialize(newBase);
         newBase.SetBotFactory(botFactory);
 
         ResourceScanner scanner = newBase.GetComponentInChildren<ResourceScanner>();
-        ResourceWarhouse warhouse = newBase.GetComponent<ResourceWarhouse>();
+        scanner?.gameObject.SetActive(true);
+    }
 
-        ResourceCounterView counterView = newBase.GetComponentInChildren<ResourceCounterView>();
-
-        if (scanner != null)
-            scanner.ResourceFound += _resourcesData.AddResourceHandler;
-
-        if (warhouse != null)
+    private bool HasDependency(Object dependency, string dependencyName, string contextHint)
+    {
+        if (dependency == null)
         {
-            newBase.ResourceAdded += warhouse.ResourceChangedHandler;
-            newBase.ResourceAdded += _spawner.ResourceReleasedHandler;
-            newBase.ResourceAdded += _resourcesData.ReservationRemoveHandler;
-
-            if (counterView != null)
-                warhouse.Changed += counterView.CountUpdateHandler;
+            Debug.LogError($"{nameof(BaseFactory)} on '{name}': {dependencyName} is not assigned. {contextHint}", this);
+            return false;
         }
 
-        scanner?.gameObject.SetActive(true);
-
-        return newBase;
+        return true;
     }
 }

@@ -10,13 +10,14 @@ public class Mover : MonoBehaviour, IMover
     private Vector3 _target;
     private Coroutine _moving;
 
-    public Vector3 Position => transform.position;
-
     private void Start() =>    
         _target = transform.position;    
 
     public void MoveTo(Vector3 target)
     {
+        if (_moving != null)
+            StopCoroutine(_moving);
+
         _target = target;
 
         _moving = StartCoroutine(Moving());
@@ -24,8 +25,11 @@ public class Mover : MonoBehaviour, IMover
 
     public void Stop()
     {
-        if (_moving != null)        
-            StopCoroutine(_moving);        
+        if (_moving != null)
+        {
+            StopCoroutine(_moving);
+            _moving = null;
+        }
     }
 
     public bool IsMovingComplete()

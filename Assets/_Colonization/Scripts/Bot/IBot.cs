@@ -8,8 +8,8 @@ public interface IBot
     Vector3 ConstructTargetPosition { get; set; }
     IMover Mover { get; }
     IInventory Inventory { get; }
-    Base OwnerBase { get; }
+    IBase OwnerBase { get; }
     void GiveResource(Resource resource);
     void SetTargetResource(Resource resource);
-    void SwitchBase(Base newBase);
+    void SwitchBase(IBase newBase);
 }

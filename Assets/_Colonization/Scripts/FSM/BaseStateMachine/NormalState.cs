@@ -1,10 +1,5 @@
-using UnityEngine;
-
 public class NormalState : IState
 {
-    private const int BotSpawnCost = 3;
-    private const int ExpandCost = 5;
-
     private BaseStateMachine _stateMachine;
 
     public NormalState(BaseStateMachine baseStateMachine)
@@ -20,16 +15,16 @@ public class NormalState : IState
     {
         IBase baseData = _stateMachine.Base;
 
-        if (baseData.HasConstractNewBase == false && baseData.ResourceCount >= BotSpawnCost)
+        if (baseData.HasConstructNewBase == false && baseData.ResourceCount >= BaseBalance.BotSpawnCost)
         {
             baseData.TrySpawnBot();
             return;
         }
 
-        if (baseData.HasConstractNewBase == false)
+        if (baseData.HasConstructNewBase == false)
             return;
 
-        if (baseData.ResourceCount >= ExpandCost &&
+        if (baseData.ResourceCount >= BaseBalance.ExpandCost &&
             baseData.BotCount > 1 &&
             baseData.HasBotOnConstructTask == false)
         {

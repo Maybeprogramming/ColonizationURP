@@ -36,10 +36,17 @@ public class CameraRotator : MonoBehaviour
         HandleSmothing();
     }
 
+    public Vector3 GetOffset()
+    {
+        Quaternion rotation = Quaternion.Euler(_currentVertical, _currentHorizontal, 0f);
+
+        return rotation * Vector3.back * _currentDistance;
+    }
+
     private void HandleZoom()
     {
         _targetDistance -= _input.ScrollDelta.y * _scrollSensitivity;
-        _targetDistance = Mathf.Clamp(_targetDistance, _minDistance, _maxDistance);        
+        _targetDistance = Mathf.Clamp(_targetDistance, _minDistance, _maxDistance);
     }
 
     private void HandleSmothing()
@@ -77,12 +84,5 @@ public class CameraRotator : MonoBehaviour
 
         _targetHorizontal = _currentHorizontal;
         _targetVertical = _currentVertical;
-    }
-
-    public Vector3 GetOffset()
-    {
-        Quaternion rotation = Quaternion.Euler(_currentVertical, _currentHorizontal, Vector3.zero.z);
-
-        return rotation * Vector3.back * _currentDistance;
     }
 }

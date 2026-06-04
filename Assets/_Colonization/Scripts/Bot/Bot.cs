@@ -11,14 +11,15 @@ public class Bot : MonoBehaviour, IBot
     private Mover _mover;
     private Inventory _botInventory;
     private BotStateMachine _stateMachine;
+    private BaseFactory _cachedBaseFactory;
 
     [field: SerializeField] public bool HasConstructTask { get; set; }
     public Vector3 ConstructTargetPosition { get; set; }
 
     public Resource TargetResource => _targetResource;
     public Vector3 OwnerBasePosition => _ownerBase.transform.position;
-    public Base OwnerBase => _ownerBase;
-    public bool IsBusy => _stateMachine.GetCurrentState is IdleState == false;
+    public IBase OwnerBase => _ownerBase;
+    public bool IsBusy => _stateMachine.CurrentState?.IsBusy ?? false;
     public IInventory Inventory => _botInventory;
     public IMover Mover => _mover;
 
@@ -27,7 +28,7 @@ public class Bot : MonoBehaviour, IBot
         _mover = GetComponent<Mover>();
         _botInventory = GetComponent<Inventory>();
         _stateMachine = GetComponent<BotStateMachine>();
-        _stateMachine.SetOwnerBase(this);
+        _stateMachine.SetOwnerBase(this, _cachedBaseFactory);
     }
 
     public void GiveResource(Resource resource)
@@ -39,17 +40,24 @@ public class Bot : MonoBehaviour, IBot
     public void SetTargetResource(Resource resource) =>
         _targetResource = resource;
 
-    public void Init(Base ownerBase)
+    public void Init(Base ownerBase, BaseFactory baseFactory)
     {
         _ownerBase = ownerBase;
+        _cachedBaseFactory = baseFactory;
     }
 
-    public void SwitchBase(Base newBase)
+    public void SwitchBase(IBase newBase)
     {
+        if (newBase == null)
+            return;
+
         _ownerBase.RemoveBot(this);
-        _ownerBase = newBase;
+        _ownerBase = (Base)newBase;
         newBase.AddBot(this);
         HasConstructTask = false;
         _targetResource = null;
+
+        if (_stateMachine != null && newBase.BaseFactory != null)
+            _stateMachine.SetOwnerBase(this, newBase.BaseFactory);
     }
 }

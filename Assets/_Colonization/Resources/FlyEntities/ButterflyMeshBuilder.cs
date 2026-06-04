@@ -51,28 +51,28 @@ public static class ButterflyMeshBuilder
         float u2 = Mathf.Lerp(uvMinX, uvMaxX, 2f / QuadDivisions);
         float u3 = uvMaxX;
 
-        vertices[0] = new Vector3(xLeft, 0, zBottom);
+        vertices[0] = new Vector3(xLeft, 0f, zBottom);
         uvCoordinates[0] = new Vector2(u0, uvMinY);
 
-        vertices[1] = new Vector3(xLeft, 0, zTop);
+        vertices[1] = new Vector3(xLeft, 0f, zTop);
         uvCoordinates[1] = new Vector2(u0, uvMaxY);
 
-        vertices[2] = new Vector3(xMidLeft, 0, zBottom);
+        vertices[2] = new Vector3(xMidLeft, 0f, zBottom);
         uvCoordinates[2] = new Vector2(u1, uvMinY);
 
-        vertices[3] = new Vector3(xMidLeft, 0, zTop);
+        vertices[3] = new Vector3(xMidLeft, 0f, zTop);
         uvCoordinates[3] = new Vector2(u1, uvMaxY);
 
-        vertices[4] = new Vector3(xMidRight, 0, zBottom);
+        vertices[4] = new Vector3(xMidRight, 0f, zBottom);
         uvCoordinates[4] = new Vector2(u2, uvMinY);
 
-        vertices[5] = new Vector3(xMidRight, 0, zTop);
+        vertices[5] = new Vector3(xMidRight, 0f, zTop);
         uvCoordinates[5] = new Vector2(u2, uvMaxY);
 
-        vertices[6] = new Vector3(xRight, 0, zBottom);
+        vertices[6] = new Vector3(xRight, 0f, zBottom);
         uvCoordinates[6] = new Vector2(u3, uvMinY);
 
-        vertices[7] = new Vector3(xRight, 0, zTop);
+        vertices[7] = new Vector3(xRight, 0f, zTop);
         uvCoordinates[7] = new Vector2(u3, uvMaxY);
 
         int[] triangleIndices = { 0, 2, 1, 1, 2, 3, 2, 4, 3, 3, 4, 5, 4, 6, 5, 5, 6, 7 };

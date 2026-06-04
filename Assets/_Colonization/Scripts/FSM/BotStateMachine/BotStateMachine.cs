@@ -1,6 +1,7 @@
 public class BotStateMachine : StateMachine
 {
     public IBot Bot { get; private set; }
+    public BaseFactory BaseFactory { get; private set; }
 
     private void Start()
     {
@@ -13,8 +14,9 @@ public class BotStateMachine : StateMachine
         TransitionTo<IdleState>();
     }
 
-    public void SetOwnerBase(IBot bot)
+    public void SetOwnerBase(IBot bot, BaseFactory baseFactory)
     {
         Bot = bot;
+        BaseFactory = baseFactory;
     }
 }

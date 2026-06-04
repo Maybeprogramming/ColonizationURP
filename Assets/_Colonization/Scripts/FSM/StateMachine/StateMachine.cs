@@ -15,7 +15,7 @@ public abstract class StateMachine : MonoBehaviour, IStateMachine
     protected virtual void UpdateState() =>
         _currentState?.Update();
 
-    public IState GetCurrentState => _currentState;
+    public IState CurrentState => _currentState;
 
     public void TransitionTo<T>() where T : IState
     {

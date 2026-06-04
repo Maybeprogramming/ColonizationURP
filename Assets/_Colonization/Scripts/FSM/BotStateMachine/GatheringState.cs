@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class GatheringState : IState
 {
+    private const float PickupDelay = 1.5f;
+
     private readonly BotStateMachine _stateMachine;
 
     private float _delayTimer;
@@ -11,7 +13,7 @@ public class GatheringState : IState
 
     public void Enter()
     {
-        _delayTimer = 1.5f;
+        _delayTimer = PickupDelay;
     }
 
     private void PickupResource()

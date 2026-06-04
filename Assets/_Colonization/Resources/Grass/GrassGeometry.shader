@@ -29,6 +29,8 @@ Shader "Custom/GrassGeometry"
             #pragma require geometry
             #pragma target 4.6
 
+            #define TWO_PI 6.28318530718
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
@@ -42,21 +44,21 @@ Shader "Custom/GrassGeometry"
             float _WindStrength;
             float _Jitter;
 
-            struct v2g
+            struct VertexToGeometry
             {
                 uint instanceID : TEXCOORD0;
             };
 
-            struct g2f
+            struct GeometryToFragment
             {
                 float4 pos : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 float3 worldPos : TEXCOORD1;
             };
 
-            v2g vert(uint instanceID : SV_InstanceID)
+            VertexToGeometry vert(uint instanceID : SV_InstanceID)
             {
-                v2g output;
+                VertexToGeometry output;
                 output.instanceID = instanceID;
                 return output;
             }
@@ -67,7 +69,7 @@ Shader "Custom/GrassGeometry"
             }
 
             [maxvertexcount(12)]
-            void geom(point v2g input[1], inout TriangleStream<g2f> stream)
+            void geom(point VertexToGeometry input[1], inout TriangleStream<GeometryToFragment> stream)
             {
                 uint id = input[0].instanceID;
                 float4 data = _Positions[id];
@@ -76,7 +78,7 @@ Shader "Custom/GrassGeometry"
 
                 float height = _BladeHeight * (1 - _Jitter + GetRandom(seed + 1) * _Jitter);
                 float width = _BladeWidth * (0.8 + GetRandom(seed + 2) * 0.4);
-                float wind = sin(_Time.y * _WindSpeed + seed * 6.28) * _WindStrength;
+                float wind = sin(_Time.y * _WindSpeed + seed * TWO_PI) * _WindStrength;
 
                 float3 viewDir = _WorldSpaceCameraPos - root;
                 viewDir.y = 0;
@@ -119,7 +121,7 @@ Shader "Custom/GrassGeometry"
 
                     for (int i = 0; i < 6; i++)
                     {
-                        g2f output;
+                        GeometryToFragment output;
                         output.pos = TransformWorldToHClip(vertices[i]);
                         output.worldPos = vertices[i];
                         output.uv = uvCoordinates[quad * 6 + i];
@@ -130,9 +132,9 @@ Shader "Custom/GrassGeometry"
                 }
             }
 
-            half4 frag(g2f i) : SV_Target
+            half4 frag(GeometryToFragment input) : SV_Target
             {
-                float3 color = lerp(_BaseColor.rgb, _TopColor.rgb, i.uv.y);
+                float3 color = lerp(_BaseColor.rgb, _TopColor.rgb, input.uv.y);
 
                 Light mainLight = GetMainLight();
                 float NdotL = saturate(dot(float3(0, 1, 0), mainLight.direction) * 0.5 + 0.5);
@@ -161,6 +163,8 @@ Shader "Custom/GrassGeometry"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
+            #define TWO_PI 6.28318530718
+
             StructuredBuffer<float4> _Positions;
 
             float _BladeHeight;
@@ -169,19 +173,19 @@ Shader "Custom/GrassGeometry"
             float _WindStrength;
             float _Jitter;
 
-            struct v2g
+            struct VertexToGeometry
             {
                 uint instanceID : TEXCOORD0;
             };
 
-            struct g2f
+            struct GeometryToFragment
             {
                 float4 pos : SV_POSITION;
             };
 
-            v2g vert(uint instanceID : SV_InstanceID)
+            VertexToGeometry vert(uint instanceID : SV_InstanceID)
             {
-                v2g output;
+                VertexToGeometry output;
                 output.instanceID = instanceID;
                 return output;
             }
@@ -192,7 +196,7 @@ Shader "Custom/GrassGeometry"
             }
 
             [maxvertexcount(12)]
-            void geom(point v2g input[1], inout TriangleStream<g2f> stream)
+            void geom(point VertexToGeometry input[1], inout TriangleStream<GeometryToFragment> stream)
             {
                 uint id = input[0].instanceID;
                 float4 data = _Positions[id];
@@ -201,7 +205,7 @@ Shader "Custom/GrassGeometry"
 
                 float height = _BladeHeight * (1 - _Jitter + GetRandom(seed + 1) * _Jitter);
                 float width = _BladeWidth * (0.8 + GetRandom(seed + 2) * 0.4);
-                float wind = sin(_Time.y * _WindSpeed + seed * 6.28) * _WindStrength;
+                float wind = sin(_Time.y * _WindSpeed + seed * TWO_PI) * _WindStrength;
 
                 float3 viewDir = _WorldSpaceCameraPos - root;
                 viewDir.y = 0;
@@ -233,7 +237,7 @@ Shader "Custom/GrassGeometry"
 
                     for (int i = 0; i < 6; i++)
                     {
-                        g2f output;
+                        GeometryToFragment output;
                         float3 biased = ApplyShadowBias(vertices[i], normalWS, lightDir);
                         output.pos = TransformWorldToHClip(biased);
                         stream.Append(output);
@@ -243,7 +247,7 @@ Shader "Custom/GrassGeometry"
                 }
             }
 
-            half4 fragShadow(g2f i) : SV_TARGET
+            half4 fragShadow(GeometryToFragment input) : SV_TARGET
             {
                 return 0;
             }

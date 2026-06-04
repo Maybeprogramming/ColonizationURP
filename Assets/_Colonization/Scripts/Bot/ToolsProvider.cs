@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class ToolsProvider : MonoBehaviour
 {
-    [SerializeField] private Hummer _hummer;
+    [SerializeField, FormerlySerializedAs("_hummer")] private Hammer _hammer;
 
     private void OnEnable()
     {
@@ -12,12 +13,12 @@ public class ToolsProvider : MonoBehaviour
     [ContextMenu("Enable")]
     public void Enable()
     {
-        _hummer.gameObject.SetActive(true);
+        _hammer.gameObject.SetActive(true);
     }
 
     [ContextMenu("Disable")]
     public void Disable()
     {
-        _hummer.gameObject.SetActive(false);
+        _hammer.gameObject.SetActive(false);
     }
 }

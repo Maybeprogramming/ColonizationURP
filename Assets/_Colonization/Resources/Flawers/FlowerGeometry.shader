@@ -65,12 +65,12 @@ Shader "Custom/FlowerGeometry"
             float _WindStrength;
             float _Jitter;
 
-            struct v2g
+            struct VertexToGeometry
             {
                 uint instanceID : TEXCOORD0;
             };
 
-            struct g2f
+            struct GeometryToFragment
             {
                 float4 pos : SV_POSITION;
                 float2 uv : TEXCOORD0;
@@ -78,9 +78,9 @@ Shader "Custom/FlowerGeometry"
                 float4 color : TEXCOORD2;
             };
 
-            v2g vert(uint instanceID : SV_InstanceID)
+            VertexToGeometry vert(uint instanceID : SV_InstanceID)
             {
-                v2g output;
+                VertexToGeometry output;
                 output.instanceID = instanceID;
                 return output;
             }
@@ -90,9 +90,9 @@ Shader "Custom/FlowerGeometry"
                 return frac(sin(seed * 123.456) * 789.123);
             }
 
-            void EmitQuad(inout TriangleStream<g2f> stream, float3 a, float3 b, float3 c, float3 d, float2 uvA, float2 uvB, float2 uvC, float2 uvD, float4 color)
+            void EmitQuad(inout TriangleStream<GeometryToFragment> stream, float3 a, float3 b, float3 c, float3 d, float2 uvA, float2 uvB, float2 uvC, float2 uvD, float4 color)
             {
-                g2f output;
+                GeometryToFragment output;
                 output.color = color;
 
                 output.pos = TransformWorldToHClip(a);
@@ -129,7 +129,7 @@ Shader "Custom/FlowerGeometry"
             }
 
             [maxvertexcount(72)]
-            void geom(point v2g input[1], inout TriangleStream<g2f> stream)
+            void geom(point VertexToGeometry input[1], inout TriangleStream<GeometryToFragment> stream)
             {
                 uint id = input[0].instanceID;
                 float4 data = _Positions[id];
@@ -139,7 +139,7 @@ Shader "Custom/FlowerGeometry"
                 float height = _StemHeight * (1 - _Jitter + GetRandom(seed + 1) * _Jitter);
                 float stemWidth = _StemWidth * (0.8 + GetRandom(seed + 2) * 0.4);
                 float headSize = _HeadSize * (0.8 + GetRandom(seed + 3) * 0.4);
-                float wind = sin(_Time.y * _WindSpeed + seed * 6.28) * _WindStrength;
+                float wind = sin(_Time.y * _WindSpeed + seed * TWO_PI) * _WindStrength;
 
                 float3 viewDir = _WorldSpaceCameraPos - root;
                 viewDir.y = 0;
@@ -161,7 +161,7 @@ Shader "Custom/FlowerGeometry"
                     float3 topLeft = stemTop + axis * -stemWidth * 0.3;
                     float3 topRight = stemTop + axis * stemWidth * 0.3;
 
-                    g2f output;
+                    GeometryToFragment output;
                     output.color = 0;
 
                     output.pos = TransformWorldToHClip(bottomLeft);
@@ -228,7 +228,7 @@ Shader "Custom/FlowerGeometry"
                         float3 topLeft = tip + widthDir * -tipHalfWidth;
                         float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        g2f output;
+                        GeometryToFragment output;
                         output.color = 0;
 
                         output.pos = TransformWorldToHClip(bottomLeft);
@@ -285,7 +285,7 @@ Shader "Custom/FlowerGeometry"
                         float3 centerTopLeft = centerUp + centerAxis * -centerSize + float3(0, centerSize * 0.5, 0);
                         float3 centerTopRight = centerUp + centerAxis * centerSize + float3(0, centerSize * 0.5, 0);
 
-                        g2f output;
+                        GeometryToFragment output;
                         output.color = 0;
 
                         output.pos = TransformWorldToHClip(centerBottomLeft);
@@ -350,7 +350,7 @@ Shader "Custom/FlowerGeometry"
                         float3 topLeft = tip + widthDir * -tipHalfWidth;
                         float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        g2f output;
+                        GeometryToFragment output;
                         output.color = 0;
 
                         output.pos = TransformWorldToHClip(bottomLeft);
@@ -415,7 +415,7 @@ Shader "Custom/FlowerGeometry"
                         float3 topLeft = tip + widthDir * -tipHalfWidth;
                         float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        g2f output;
+                        GeometryToFragment output;
                         output.color = 0;
 
                         output.pos = TransformWorldToHClip(bottomLeft);
@@ -472,7 +472,7 @@ Shader "Custom/FlowerGeometry"
                         float3 centerTopLeft = centerUp + centerAxis * -centerSize + float3(0, centerSize * 0.5, 0);
                         float3 centerTopRight = centerUp + centerAxis * centerSize + float3(0, centerSize * 0.5, 0);
 
-                        g2f output;
+                        GeometryToFragment output;
                         output.color = 0;
 
                         output.pos = TransformWorldToHClip(centerBottomLeft);
@@ -516,11 +516,11 @@ Shader "Custom/FlowerGeometry"
                 }
             }
 
-            half4 frag(g2f i) : SV_Target
+            half4 frag(GeometryToFragment input) : SV_Target
             {
                 Light mainLight = GetMainLight();
                 float NdotL = saturate(dot(float3(0, 1, 0), mainLight.direction) * 0.5 + 0.5);
-                float3 lit = i.color.rgb * mainLight.color * (mainLight.shadowAttenuation * 0.6 + 0.4) * NdotL + i.color.rgb * 0.3;
+                float3 lit = input.color.rgb * mainLight.color * (mainLight.shadowAttenuation * 0.6 + 0.4) * NdotL + input.color.rgb * 0.3;
                 return half4(lit, 1);
             }
             ENDHLSL
@@ -554,19 +554,19 @@ Shader "Custom/FlowerGeometry"
             float _WindStrength;
             float _Jitter;
 
-            struct v2g
+            struct VertexToGeometry
             {
                 uint instanceID : TEXCOORD0;
             };
 
-            struct g2f
+            struct GeometryToFragment
             {
                 float4 pos : SV_POSITION;
             };
 
-            v2g vert(uint instanceID : SV_InstanceID)
+            VertexToGeometry vert(uint instanceID : SV_InstanceID)
             {
-                v2g output;
+                VertexToGeometry output;
                 output.instanceID = instanceID;
                 return output;
             }
@@ -577,7 +577,7 @@ Shader "Custom/FlowerGeometry"
             }
 
             [maxvertexcount(72)]
-            void geom(point v2g input[1], inout TriangleStream<g2f> stream)
+            void geom(point VertexToGeometry input[1], inout TriangleStream<GeometryToFragment> stream)
             {
                 uint id = input[0].instanceID;
                 float4 data = _Positions[id];
@@ -587,7 +587,7 @@ Shader "Custom/FlowerGeometry"
                 float height = _StemHeight * (1 - _Jitter + GetRandom(seed + 1) * _Jitter);
                 float stemWidth = _StemWidth * (0.8 + GetRandom(seed + 2) * 0.4);
                 float headSize = _HeadSize * (0.8 + GetRandom(seed + 3) * 0.4);
-                float wind = sin(_Time.y * _WindSpeed + seed * 6.28) * _WindStrength;
+                float wind = sin(_Time.y * _WindSpeed + seed * TWO_PI) * _WindStrength;
 
                 float3 viewDir = _WorldSpaceCameraPos - root;
                 viewDir.y = 0;
@@ -612,11 +612,11 @@ Shader "Custom/FlowerGeometry"
                     float3 topLeft = stemTop + axis * -stemWidth * 0.3;
                     float3 topRight = stemTop + axis * stemWidth * 0.3;
 
-                    float3 verts[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
+                    float3 vertexPositions[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
                     for (int i = 0; i < 6; i++)
                     {
-                        g2f output;
-                        float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
+                        GeometryToFragment output;
+                        float3 biased = ApplyShadowBias(vertexPositions[i], normalWS, lightDir);
                         output.pos = TransformWorldToHClip(biased);
                         stream.Append(output);
                     }
@@ -648,11 +648,11 @@ Shader "Custom/FlowerGeometry"
                         float3 topLeft = tip + widthDir * -tipHalfWidth;
                         float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        float3 verts[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
+                        float3 vertexPositions[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f output;
-                            float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
+                            GeometryToFragment output;
+                            float3 biased = ApplyShadowBias(vertexPositions[i], normalWS, lightDir);
                             output.pos = TransformWorldToHClip(biased);
                             stream.Append(output);
                         }
@@ -674,11 +674,11 @@ Shader "Custom/FlowerGeometry"
                         float3 centerTopLeft = centerUp + centerAxis * -centerSize + float3(0, centerSize * 0.5, 0);
                         float3 centerTopRight = centerUp + centerAxis * centerSize + float3(0, centerSize * 0.5, 0);
 
-                        float3 verts[6] = { centerBottomLeft, centerTopLeft, centerBottomRight, centerBottomRight, centerTopLeft, centerTopRight };
+                        float3 vertexPositions[6] = { centerBottomLeft, centerTopLeft, centerBottomRight, centerBottomRight, centerTopLeft, centerTopRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f output;
-                            float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
+                            GeometryToFragment output;
+                            float3 biased = ApplyShadowBias(vertexPositions[i], normalWS, lightDir);
                             output.pos = TransformWorldToHClip(biased);
                             stream.Append(output);
                         }
@@ -708,11 +708,11 @@ Shader "Custom/FlowerGeometry"
                         float3 topLeft = tip + widthDir * -tipHalfWidth;
                         float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        float3 verts[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
+                        float3 vertexPositions[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f output;
-                            float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
+                            GeometryToFragment output;
+                            float3 biased = ApplyShadowBias(vertexPositions[i], normalWS, lightDir);
                             output.pos = TransformWorldToHClip(biased);
                             stream.Append(output);
                         }
@@ -742,11 +742,11 @@ Shader "Custom/FlowerGeometry"
                         float3 topLeft = tip + widthDir * -tipHalfWidth;
                         float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        float3 verts[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
+                        float3 vertexPositions[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f output;
-                            float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
+                            GeometryToFragment output;
+                            float3 biased = ApplyShadowBias(vertexPositions[i], normalWS, lightDir);
                             output.pos = TransformWorldToHClip(biased);
                             stream.Append(output);
                         }
@@ -768,11 +768,11 @@ Shader "Custom/FlowerGeometry"
                         float3 centerTopLeft = centerUp + centerAxis * -centerSize + float3(0, centerSize * 0.5, 0);
                         float3 centerTopRight = centerUp + centerAxis * centerSize + float3(0, centerSize * 0.5, 0);
 
-                        float3 verts[6] = { centerBottomLeft, centerTopLeft, centerBottomRight, centerBottomRight, centerTopLeft, centerTopRight };
+                        float3 vertexPositions[6] = { centerBottomLeft, centerTopLeft, centerBottomRight, centerBottomRight, centerTopLeft, centerTopRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f output;
-                            float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
+                            GeometryToFragment output;
+                            float3 biased = ApplyShadowBias(vertexPositions[i], normalWS, lightDir);
                             output.pos = TransformWorldToHClip(biased);
                             stream.Append(output);
                         }
@@ -781,7 +781,7 @@ Shader "Custom/FlowerGeometry"
                 }
             }
 
-            half4 fragShadow(g2f i) : SV_TARGET
+            half4 fragShadow(GeometryToFragment input) : SV_TARGET
             {
                 return 0;
             }

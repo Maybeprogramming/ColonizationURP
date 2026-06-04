@@ -6343,7 +6343,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 66658c3ed0d4bbc40bae59c9b034d22e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Hummer
+  m_EditorClassIdentifier: Assembly-CSharp::Hammer
 --- !u!4 &2966740384455670622 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4218478571388702845, guid: 44aa78675439ba34f88e170cdbb7661b, type: 3}

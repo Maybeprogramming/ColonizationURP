@@ -3,20 +3,12 @@ using UnityEngine;
 
 public class ResourceWarhouse : MonoBehaviour
 {
-    [SerializeField] private int _count; 
+    [SerializeField] private int _count;
+
+    public int Count => _count;
 
     public event Action<int> Changed;
     public event Action<int> Spend;
-
-    public int Count => _count; 
-
-    private void Start()
-    {
-        _count = 0;
-    }
-
-    private void OnChangeCount(int count) =>
-        Changed?.Invoke(count);
 
     public void ResourceChangedHandler(Resource _)
     {
@@ -38,5 +30,8 @@ public class ResourceWarhouse : MonoBehaviour
         }
 
         return false;
-    }    
+    }
+
+    private void OnChangeCount(int count) =>
+        Changed?.Invoke(count);
 }

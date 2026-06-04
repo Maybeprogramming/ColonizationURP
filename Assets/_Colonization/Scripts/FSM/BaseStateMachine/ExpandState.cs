@@ -1,9 +1,5 @@
-using UnityEngine;
-
 public class ExpandState : IState
 {
-    private const int ExpandCost = 5;
-
     private BaseStateMachine _stateMachine;
 
     public ExpandState(BaseStateMachine baseStateMachine)
@@ -29,7 +25,7 @@ public class ExpandState : IState
             return;
         }
 
-        if (baseData.TrySpendResources(ExpandCost) == false)
+        if (baseData.TrySpendResources(BaseBalance.ExpandCost) == false)
         {
             _stateMachine.TransitionTo<NormalState>();
             return;
@@ -43,7 +39,7 @@ public class ExpandState : IState
 
     public void Update()
     {
-        if (_stateMachine.Base.HasConstractNewBase == false)
+        if (_stateMachine.Base.HasConstructNewBase == false)
             _stateMachine.TransitionTo<NormalState>();
     }
 

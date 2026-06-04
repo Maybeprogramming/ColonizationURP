@@ -29,8 +29,7 @@ public class PlayerInputSystem : MonoBehaviour
 
     private Vector3 GetDirection()
     {
-        return new Vector3(_inputSystem.Player.Move.ReadValue<Vector2>().x,
-                            Vector3.zero.y,
-                            _inputSystem.Player.Move.ReadValue<Vector2>().y);
+        Vector2 input = _inputSystem.Player.Move.ReadValue<Vector2>();
+        return new Vector3(input.x, 0f, input.y);
     }
 }

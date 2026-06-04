@@ -6,7 +6,6 @@ public class ConstructState : IState
 
     private BotStateMachine _stateMachine;
     private float _timer;
-    private BaseFactory _baseFactory;
     private bool _constructionStarted;
 
     public ConstructState(BotStateMachine botStateMachine)
@@ -18,7 +17,6 @@ public class ConstructState : IState
     {
         _timer = ConstructDuration;
         _constructionStarted = false;
-        _baseFactory = Object.FindFirstObjectByType<BaseFactory>();
 
         Bot bot = _stateMachine.Bot as Bot;
 
@@ -56,22 +54,32 @@ public class ConstructState : IState
 
         IBot botData = _stateMachine.Bot;
         Bot bot = botData as Bot;
+        BaseFactory baseFactory = _stateMachine.BaseFactory;
 
-        if (bot == null || _baseFactory == null)
+        if (bot == null || baseFactory == null)
         {
             _stateMachine.TransitionTo<IdleState>();
             return;
         }
 
-        Base oldBase = botData.OwnerBase;
+        IBase oldBase = botData.OwnerBase;
         Vector3 buildPosition = botData.ConstructTargetPosition;
 
-        Base newBase = _baseFactory.Spawn(buildPosition, oldBase);
+        Base newBase = baseFactory.Spawn(buildPosition);
 
-        oldBase.ClearExpansionFlag();
-
-        bot.SwitchBase(newBase);
+        if (newBase != null)
+        {
+            oldBase.ClearExpansionFlag();
+            bot.SwitchBase(newBase);
+        }
+        else
+        {
+            Base baseForLog = oldBase as Base;
+            string baseName = baseForLog != null ? baseForLog.name : "unknown";
+            Debug.LogWarning($"{nameof(ConstructState)}: Spawn returned null. base='{baseName}', pos={buildPosition}", _stateMachine as MonoBehaviour);
+        }
 
         _stateMachine.TransitionTo<IdleState>();
     }
 }
+

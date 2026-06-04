@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CollectorBots.Scheduler;
@@ -7,55 +6,91 @@ using CollectorBots.Scheduler;
 [RequireComponent(typeof(BaseStateMachine), typeof(ResourceWarhouse))]
 public class Base : MonoBehaviour, IBase
 {
-    private const int BotSpawnCost = 3;
-    private const int ExpandCost = 5;
+    private const float DefaultWorkInterval = 1f;
 
-    [SerializeField] private ResourcesData _resourcesData;
     [SerializeField] private BaseStateMachine _stateMachine;
     [SerializeField] private ResourceWarhouse _warhouse;
     [SerializeField] private List<Bot> _bots = new List<Bot>();
-    [SerializeField] private float _delayTime;
+    [SerializeField] private float _delayTime = DefaultWorkInterval;
     [SerializeField] private BotFactory _botFactory;
 
-    private Coroutine _working;
-    private WaitForSeconds _wait;
+    private ResourcesData _resourcesData;
+    private BaseFactory _baseFactory;
+    private BotRoster _roster;
     private TaskScheduler _taskScheduler;
-
-    public event Action<Resource> ResourceAdded;
-    public event Action NewBaseBuilt;
+    private ExpansionController _expansion;
+    private BaseWorkLoop _workLoop;
 
     public Vector3 Position => transform.position;
     public int ResourceCount => _warhouse.Count;
-    public Vector3 FlagPosition { get; set; }
+    public Vector3 FlagPosition => _expansion.FlagPosition;
+    public bool HasConstructNewBase => _expansion.HasConstructNewBase;
+    public BaseFactory BaseFactory => _baseFactory;
+    public int BotCount => _roster.Count;
+    public bool HasBotOnConstructTask => _roster.HasOnConstructTask();
 
-    [field: SerializeField] public bool HasConstractNewBase { get; set; }
+    public event Action<Resource> ResourceAdded;
+    public event Action NewBaseBuilt
+    {
+        add { if (_expansion != null) _expansion.NewBaseBuilt += value; }
+        remove { if (_expansion != null) _expansion.NewBaseBuilt -= value; }
+    }
 
     private void Awake()
     {
-        _resourcesData ??= UnityEngine.Object.FindFirstObjectByType<ResourcesData>();
         _warhouse ??= GetComponent<ResourceWarhouse>();
         _stateMachine ??= GetComponent<BaseStateMachine>();
-        _botFactory ??= GetComponentInChildren<BotFactory>() ?? UnityEngine.Object.FindFirstObjectByType<BotFactory>();
-        _bots.RemoveAll(bot => bot == null);
+        _botFactory ??= GetComponentInChildren<BotFactory>();
+
+        _resourcesData = GameContext.ResourcesData;
+        _baseFactory = GameContext.BaseFactory;
+
+        if (_resourcesData == null)
+            Debug.LogError($"{nameof(Base)} on '{name}': {nameof(_resourcesData)} is not assigned. Add {nameof(GameContext)} to scene.", this);
+
+        if (_baseFactory == null)
+            Debug.LogError($"{nameof(Base)} on '{name}': {nameof(_baseFactory)} is not assigned. Add {nameof(GameContext)} to scene.", this);
+
+        _roster = new BotRoster(_bots);
+        _roster.ClearNulls();
+        _expansion = new ExpansionController();
+    }
+
+    private void OnEnable()
+    {
+        if (_botFactory != null)
+            _botFactory.BotCreated += OnBotCreated;
+    }
+
+    private void OnDisable()
+    {
+        if (_botFactory != null)
+            _botFactory.BotCreated -= OnBotCreated;
     }
 
     private void Start()
     {
-        _wait = new WaitForSeconds(_delayTime);
-        _taskScheduler = new TaskScheduler(_bots);
-        _working = StartCoroutine(Working());
+        _taskScheduler = new TaskScheduler(_roster.Bots);
+        _workLoop = new BaseWorkLoop(this, _resourcesData, _taskScheduler, () => Position, _delayTime);
+        _workLoop.Start();
         _stateMachine.Init(this);
     }
 
     private void OnDestroy() =>
-        StopCoroutine(_working);
+        _workLoop?.Stop();
 
     public void TakeResource(Resource resource) =>
         OnResourceAdded(resource);
 
     public bool TrySpawnBot()
     {
-        if (_warhouse.TrySpendResource(BotSpawnCost) == false)
+        if (_botFactory == null)
+        {
+            Debug.LogError($"{nameof(Base)} on '{name}': {nameof(_botFactory)} is not assigned. Call {nameof(SetBotFactory)} after spawn.", this);
+            return false;
+        }
+
+        if (_warhouse.TrySpendResource(BaseBalance.BotSpawnCost) == false)
             return false;
 
         _botFactory.Spawn();
@@ -65,66 +100,48 @@ public class Base : MonoBehaviour, IBase
     public bool TrySpendResources(int count) =>
         _warhouse.TrySpendResource(count);
 
-    public void AddBot(Bot bot)
-    {
-        _bots.Add(bot);
-        _taskScheduler?.AddBot(bot);
-    }
+    public void AddBot(Bot bot) =>
+        _roster.Add(bot);
 
-    public void RemoveBot(Bot bot)
-    {
-        _bots.Remove(bot);
-        _taskScheduler.RemoveBot(bot);
-    }
-
-    public void SetBotFactory(BotFactory factory) =>
-        _botFactory = factory;
+    public void RemoveBot(Bot bot) =>
+        _roster.Remove(bot);
 
     public bool HasBot(Bot bot) =>
-        _bots.Contains(bot);
-
-    public int BotCount => _bots.Count;
-    public bool HasBotOnConstructTask => _bots.Exists(bot => bot.HasConstructTask);
-
-    public void ClearExpansionFlag()
-    {
-        HasConstractNewBase = false;
-        NewBaseBuilt?.Invoke();
-    }
+        _roster.Contains(bot);
 
     public Bot GetFreeBot() =>
-        _bots.Find(bot => bot.IsBusy == false && bot.HasConstructTask == false);
+        _roster.GetFreeBot();
 
-    public void CancelConstructTasks()
+    public void CancelConstructTasks() =>
+        _roster.CancelConstructTasks();
+
+    public void SetBotFactory(BotFactory factory)
     {
-        for (int i = 0; i < _bots.Count; i++)
-            _bots[i].HasConstructTask = false;
+        if (_botFactory != null)
+            _botFactory.BotCreated -= OnBotCreated;
+
+        _botFactory = factory;
+
+        if (_botFactory != null)
+            _botFactory.BotCreated += OnBotCreated;
     }
 
-    private void DoWork()
-    {
-        while (_resourcesData.TryGetResource(out Resource resource))
-        {
-            _taskScheduler.AddTask(new Task(resource, Position));
-        }
+    public void ClearExpansionFlag() =>
+        _expansion.ClearFlag();
 
-        int assignedTasksCount = _taskScheduler.AssignTasks();
+    public void AssignExpansionFlag(Vector3 position) =>
+        _expansion.AssignFlag(position);
 
-        if (_taskScheduler.PendingTasksCount > 0 && assignedTasksCount == 0)
-        {
-            Debug.Log("Нет свободных рабочих");
-        }
-    }
+    public void CancelExpansion() =>
+        _expansion.Cancel();
 
     private void OnResourceAdded(Resource resource) =>
         ResourceAdded?.Invoke(resource);
 
-    private IEnumerator Working()
+    private void OnBotCreated(Bot bot)
     {
-        while (enabled)
-        {
-            yield return _wait;
-            DoWork();
-        }
+        bot.transform.position = transform.position + BaseBalance.BotSpawnOffset;
+        bot.Init(this, BaseFactory);
+        AddBot(bot);
     }
 }
