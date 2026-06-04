@@ -11,19 +11,27 @@ public class Bootstrapper : MonoBehaviour
 
     private void OnEnable()
     {
+        BotFactory botFactory = Object.FindFirstObjectByType<BotFactory>();
+
+        if (botFactory != null)
+            botFactory.Initialize(_base);
+
         _base.ResourceAdded += _counter.ResourceChangedHandler;
         _base.ResourceAdded += _spawner.ResourceReleasedHandler;
+        _base.ResourceAdded += _resourcesData.ReservationRemoveHandler;
         _counter.Changed += _counterView.CountUpdateHandler;
         _resourceScanner.ResourceFound += _resourcesData.AddResourceHandler;
-        _base.ResourceAdded += _resourcesData.ReservationRemoveHandler;
+
+        if (GetComponent<FlagPlacer>() == null)
+            gameObject.AddComponent<FlagPlacer>();
     }
 
     private void OnDisable()
     {
         _base.ResourceAdded -= _counter.ResourceChangedHandler;
         _base.ResourceAdded -= _spawner.ResourceReleasedHandler;
+        _base.ResourceAdded -= _resourcesData.ReservationRemoveHandler;
         _counter.Changed -= _counterView.CountUpdateHandler;
         _resourceScanner.ResourceFound -= _resourcesData.AddResourceHandler;
-        _base.ResourceAdded -= _resourcesData.ReservationRemoveHandler;
     }
 }

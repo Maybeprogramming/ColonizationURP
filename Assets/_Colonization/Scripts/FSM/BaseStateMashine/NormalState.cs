@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class NormalState : IState
 {
+    private const int BotSpawnCost = 3;
+    private const int ExpandCost = 5;
+
     private BaseStateMachine _stateMachine;
 
     public NormalState(BaseStateMachine baseStateMachine)
@@ -9,25 +12,27 @@ public class NormalState : IState
         _stateMachine = baseStateMachine;
     }
 
-    public void Enter()
-    {
-        Debug.Log($"Состояние производства юнитов");
-    }
+    public void Enter() { }
 
-    public void Exit()
-    {
-
-    }
+    public void Exit() { }
 
     public void Update()
     {
-        if (_stateMachine.Base.ResourceCount > 3 && _stateMachine.Base.HasConstractNewBase == false)
+        IBase baseData = _stateMachine.Base;
+
+        if (baseData.HasConstractNewBase == false && baseData.ResourceCount >= BotSpawnCost)
         {
-            Debug.Log($"Произвести юнита, потратив 3 ресурса");
+            baseData.TrySpawnBot();
+            return;
         }
-        else if(_stateMachine.Base.ResourceCount > 5 && _stateMachine.Base.HasConstractNewBase)
+
+        if (baseData.HasConstractNewBase == false)
+            return;
+
+        if (baseData.ResourceCount >= ExpandCost &&
+            baseData.BotCount > 1 &&
+            baseData.HasBotOnConstructTask == false)
         {
-            Debug.Log($"Назначить юнита для постройки новой базы, потратив 5 ресурсов");
             _stateMachine.TransitionTo<ExpandState>();
         }
     }

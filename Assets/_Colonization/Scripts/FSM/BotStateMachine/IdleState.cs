@@ -12,9 +12,9 @@ public class IdleState : IState
     public void Update()
     {
         if (_stateMachine.Bot.HasConstructTask)
-            _stateMachine.TransitionTo<ConstructState>();
+            _stateMachine.TransitionTo<WalkState>();
 
-        if(_stateMachine.Bot.TargetResource != null)        
+        if (_stateMachine.Bot.TargetResource != null)        
             _stateMachine.TransitionTo<WalkState>();        
     }
 }

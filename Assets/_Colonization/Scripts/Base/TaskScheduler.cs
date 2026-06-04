@@ -52,6 +52,11 @@ namespace CollectorBots.Scheduler
             _bots.Add(bot);
         }
 
+        public void RemoveBot(Bot bot)
+        {
+            _bots.Remove(bot);
+        }
+
         private Task GetNextTask()
         {
             RemoveInvalidTasks();

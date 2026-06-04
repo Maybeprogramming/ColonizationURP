@@ -1,10 +1,9 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Mover), 
+[RequireComponent(typeof(Mover),
                   typeof(BotStateMachine),
                   typeof(Inventory))]
-
-public class Bot: MonoBehaviour, IBot
+public class Bot : MonoBehaviour, IBot
 {
     [SerializeField] private Base _ownerBase;
     [SerializeField] private Resource _targetResource;
@@ -13,14 +12,13 @@ public class Bot: MonoBehaviour, IBot
     private Inventory _botInventory;
     private BotStateMachine _stateMachine;
 
-    [field: SerializeField] public bool HasConstructTask { get; set; } //Заглушка под будущее
+    [field: SerializeField] public bool HasConstructTask { get; set; }
+    public Vector3 ConstructTargetPosition { get; set; }
 
     public Resource TargetResource => _targetResource;
-
     public Vector3 OwnerBasePosition => _ownerBase.transform.position;
-
+    public Base OwnerBase => _ownerBase;
     public bool IsBusy => _stateMachine.GetCurrentState is IdleState == false;
-
     public IInventory Inventory => _botInventory;
     public IMover Mover => _mover;
 
@@ -38,11 +36,20 @@ public class Bot: MonoBehaviour, IBot
         _targetResource = null;
     }
 
-    public void SetTargetResource(Resource resource) =>    
+    public void SetTargetResource(Resource resource) =>
         _targetResource = resource;
 
     public void Init(Base ownerBase)
     {
         _ownerBase = ownerBase;
+    }
+
+    public void SwitchBase(Base newBase)
+    {
+        _ownerBase.RemoveBot(this);
+        _ownerBase = newBase;
+        newBase.AddBot(this);
+        HasConstructTask = false;
+        _targetResource = null;
     }
 }
