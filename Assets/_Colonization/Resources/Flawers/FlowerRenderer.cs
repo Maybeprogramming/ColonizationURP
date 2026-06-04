@@ -5,19 +5,26 @@ using UnityEngine.Rendering;
 [RequireComponent(typeof(FlowerSpawner))]
 public class FlowerRenderer : MonoBehaviour
 {
+    private const float MeshVertexOffset = 0.01f;
+    private const float BoundsMultiplier = 2f;
+
+    private readonly int _positionsPropertyId = Shader.PropertyToID("_Positions");
+
     [SerializeField] private Material _flowerMaterial;
     [SerializeField] private float _maxViewDistance = 50;
 
     private FlowerSpawner _spawner;
-    private MaterialPropertyBlock _props;
+    private MaterialPropertyBlock _propertyBlock;
     private Bounds _renderBounds;
+    private Mesh _pointMesh;
 
     private void Awake()
     {
         _spawner = GetComponent<FlowerSpawner>();
-        _props = new MaterialPropertyBlock();
+        _propertyBlock = new MaterialPropertyBlock();
 
-        _renderBounds = new Bounds(transform.position, Vector3.one * _maxViewDistance * 2);
+        _pointMesh = CreatePointMesh();
+        _renderBounds = new Bounds(transform.position, Vector3.one * _maxViewDistance * BoundsMultiplier);
     }
 
     private void Update()
@@ -25,38 +32,39 @@ public class FlowerRenderer : MonoBehaviour
         if (_spawner.PositionsBuffer == null || _flowerMaterial == null)
             return;
 
-        _props.SetBuffer("_Positions", _spawner.PositionsBuffer);
+        _propertyBlock.SetBuffer(_positionsPropertyId, _spawner.PositionsBuffer);
 
         Graphics.DrawMeshInstancedProcedural(
-            GetPointMesh(),
+            _pointMesh,
             0,
             _flowerMaterial,
             _renderBounds,
             _spawner.FlowerCount,
-            _props,
+            _propertyBlock,
             ShadowCastingMode.On,
             true,
             gameObject.layer
         );
     }
 
-    private static Mesh _bladeMesh;
-
-    private static Mesh GetPointMesh()
+    private Mesh CreatePointMesh()
     {
-        if (_bladeMesh != null)
-            return _bladeMesh;
+        Mesh mesh = new Mesh();
 
-        _bladeMesh = new Mesh();
-        _bladeMesh.vertices = new Vector3[]
+        Vector3[] vertices = new Vector3[]
         {
             Vector3.zero,
-            Vector3.right * 0.01f,
-            Vector3.forward * 0.01f
+            Vector3.right * MeshVertexOffset,
+            Vector3.forward * MeshVertexOffset
         };
-        _bladeMesh.triangles = new int[] { 0, 1, 2 };
-        _bladeMesh.bounds = new Bounds(Vector3.zero, Vector3.one * 0.01f);
-        _bladeMesh.name = "PointMesh";
-        return _bladeMesh;
+
+        int[] triangles = new int[] { 0, 1, 2 };
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.bounds = new Bounds(Vector3.zero, Vector3.one * MeshVertexOffset);
+        mesh.name = "PointMesh";
+
+        return mesh;
     }
 }

@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class FlowerSpawner : MonoBehaviour
 {
+    private const int Stride = 16;
+    private const float RaycastOffset = 10f;
+    private const float RaycastMaxDistance = 50f;
+
     [SerializeField] private int _flowerCount = 2000;
     [SerializeField] private Bounds _spawnBounds = new Bounds(Vector3.zero, Vector3.one * 10);
     [SerializeField] private LayerMask _groundLayer = ~0;
@@ -17,6 +21,17 @@ public class FlowerSpawner : MonoBehaviour
         GeneratePositions();
     }
 
+    private void OnDestroy()
+    {
+        _positionsBuffer?.Release();
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireCube(_spawnBounds.center, _spawnBounds.size);
+    }
+
     private void GeneratePositions()
     {
         _positions = new Vector4[_flowerCount];
@@ -29,10 +44,9 @@ public class FlowerSpawner : MonoBehaviour
                 Random.Range(_spawnBounds.min.z, _spawnBounds.max.z)
             );
 
-            RaycastHit hit;
+            Vector3 rayOrigin = new Vector3(randomPoint.x, _spawnBounds.max.y + RaycastOffset, randomPoint.z);
 
-            if (Physics.Raycast(new Vector3(randomPoint.x, _spawnBounds.max.y + 10, randomPoint.z),
-                                Vector3.down, out hit, 50, _groundLayer))
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, RaycastMaxDistance, _groundLayer))
             {
                 randomPoint.y = hit.point.y;
             }
@@ -44,18 +58,7 @@ public class FlowerSpawner : MonoBehaviour
             _positions[i] = new Vector4(randomPoint.x, randomPoint.y, randomPoint.z, Random.value);
         }
 
-        _positionsBuffer = new ComputeBuffer(_flowerCount, 16, ComputeBufferType.Structured);
+        _positionsBuffer = new ComputeBuffer(_flowerCount, Stride, ComputeBufferType.Structured);
         _positionsBuffer.SetData(_positions);
-    }
-
-    private void OnDestroy()
-    {
-        _positionsBuffer?.Release();
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireCube(_spawnBounds.center, _spawnBounds.size);
     }
 }

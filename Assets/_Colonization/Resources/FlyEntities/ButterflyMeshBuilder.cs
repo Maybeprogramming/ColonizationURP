@@ -3,15 +3,19 @@ using UnityEngine;
 
 public static class ButterflyMeshBuilder
 {
-    private static readonly Dictionary<Sprite, Mesh> _cache = new();
+    private const float HalfHeight = 0.5f;
+    private const float QuadDivisions = 3f;
+    private const float WidthRatio = 2f / 3f;
 
-    public static Mesh Build(Sprite sprite)
+    private static readonly Dictionary<Sprite, Mesh> MeshCache = new();
+
+    public static Mesh BuildMesh(Sprite sprite)
     {
-        if (_cache.TryGetValue(sprite, out Mesh cached))
-            return cached;
+        if (MeshCache.TryGetValue(sprite, out Mesh cachedMesh))
+            return cachedMesh;
 
         Mesh mesh = BuildInternal(sprite);
-        _cache[sprite] = mesh;
+        MeshCache[sprite] = mesh;
         return mesh;
     }
 
@@ -19,51 +23,65 @@ public static class ButterflyMeshBuilder
     {
         Rect rect = sprite.rect;
         float aspect = rect.width / rect.height;
-        float halfHeight = 0.5f;
-        float halfWidth = halfHeight * aspect;
+        float halfWidth = HalfHeight * aspect;
 
-        float qw = halfWidth * 2f / 3f;
-        float hh = halfHeight;
+        float quadWidth = halfWidth * WidthRatio;
 
-        Vector3[] verts = new Vector3[8];
-        Vector2[] uvs = new Vector2[8];
-        int[] tris = new int[18];
+        float xLeft = -halfWidth;
+        float xMidLeft = -halfWidth + quadWidth;
+        float xMidRight = -halfWidth + quadWidth * 2f;
+        float xRight = halfWidth;
+        float zBottom = -HalfHeight;
+        float zTop = HalfHeight;
 
-        float x0 = -halfWidth;
-        float x1 = -halfWidth + qw;
-        float x2 = -halfWidth + qw * 2f;
-        float x3 = halfWidth;
-        float z0 = -hh;
-        float z1 = hh;
+        Vector3[] vertices = new Vector3[8];
+        Vector2[] uvCoordinates = new Vector2[8];
+        int[] triangles = new int[18];
 
-        Texture2D tex = sprite.texture;
-        Rect texRect = sprite.textureRect;
-        float uMin = texRect.xMin / tex.width;
-        float uMax = texRect.xMax / tex.width;
-        float vMin = texRect.yMin / tex.height;
-        float vMax = texRect.yMax / tex.height;
+        Texture2D texture = sprite.texture;
+        Rect textureRect = sprite.textureRect;
 
-        float u0 = uMin;
-        float u1 = Mathf.Lerp(uMin, uMax, 1f / 3f);
-        float u2 = Mathf.Lerp(uMin, uMax, 2f / 3f);
-        float u3 = uMax;
+        float uvMinX = textureRect.xMin / texture.width;
+        float uvMaxX = textureRect.xMax / texture.width;
+        float uvMinY = textureRect.yMin / texture.height;
+        float uvMaxY = textureRect.yMax / texture.height;
 
-        verts[0] = new Vector3(x0, 0, z0); uvs[0] = new Vector2(u0, vMin);
-        verts[1] = new Vector3(x0, 0, z1); uvs[1] = new Vector2(u0, vMax);
-        verts[2] = new Vector3(x1, 0, z0); uvs[2] = new Vector2(u1, vMin);
-        verts[3] = new Vector3(x1, 0, z1); uvs[3] = new Vector2(u1, vMax);
-        verts[4] = new Vector3(x2, 0, z0); uvs[4] = new Vector2(u2, vMin);
-        verts[5] = new Vector3(x2, 0, z1); uvs[5] = new Vector2(u2, vMax);
-        verts[6] = new Vector3(x3, 0, z0); uvs[6] = new Vector2(u3, vMin);
-        verts[7] = new Vector3(x3, 0, z1); uvs[7] = new Vector2(u3, vMax);
+        float u0 = uvMinX;
+        float u1 = Mathf.Lerp(uvMinX, uvMaxX, 1f / QuadDivisions);
+        float u2 = Mathf.Lerp(uvMinX, uvMaxX, 2f / QuadDivisions);
+        float u3 = uvMaxX;
 
-        int[] t = { 0,2,1, 1,2,3,  2,4,3, 3,4,5,  4,6,5, 5,6,7 };
-        System.Array.Copy(t, tris, t.Length);
+        vertices[0] = new Vector3(xLeft, 0, zBottom);
+        uvCoordinates[0] = new Vector2(u0, uvMinY);
+
+        vertices[1] = new Vector3(xLeft, 0, zTop);
+        uvCoordinates[1] = new Vector2(u0, uvMaxY);
+
+        vertices[2] = new Vector3(xMidLeft, 0, zBottom);
+        uvCoordinates[2] = new Vector2(u1, uvMinY);
+
+        vertices[3] = new Vector3(xMidLeft, 0, zTop);
+        uvCoordinates[3] = new Vector2(u1, uvMaxY);
+
+        vertices[4] = new Vector3(xMidRight, 0, zBottom);
+        uvCoordinates[4] = new Vector2(u2, uvMinY);
+
+        vertices[5] = new Vector3(xMidRight, 0, zTop);
+        uvCoordinates[5] = new Vector2(u2, uvMaxY);
+
+        vertices[6] = new Vector3(xRight, 0, zBottom);
+        uvCoordinates[6] = new Vector2(u3, uvMinY);
+
+        vertices[7] = new Vector3(xRight, 0, zTop);
+        uvCoordinates[7] = new Vector2(u3, uvMaxY);
+
+        int[] triangleIndices = { 0, 2, 1, 1, 2, 3, 2, 4, 3, 3, 4, 5, 4, 6, 5, 5, 6, 7 };
+        System.Array.Copy(triangleIndices, triangles, triangleIndices.Length);
 
         Mesh mesh = new Mesh();
-        mesh.vertices = verts;
-        mesh.uv = uvs;
-        mesh.triangles = tris;
+        mesh.vertices = vertices;
+        mesh.uv = uvCoordinates;
+        mesh.triangles = triangles;
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         mesh.name = "ButterflyMesh_" + sprite.name;

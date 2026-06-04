@@ -5,38 +5,39 @@ using UnityEngine.Pool;
 
 public class ButterflySpawner : MonoBehaviour
 {
+    private const float GizmoAlpha = 0.3f;
+
     [SerializeField] private Butterfly _butterflyPrefab;
     [SerializeField] private Sprite[] _sprites;
     [SerializeField] private Bounds _spawnBounds;
-    [SerializeField] private float _minHeight;
-    [SerializeField] private float _maxHeight;
-    [SerializeField] private float _minSpeed;
-    [SerializeField] private float _maxSpeed;
-    [SerializeField] private float _minLifetime;
-    [SerializeField] private float _maxLifetime;
-    [SerializeField] private int _maxButterflies;
+    [SerializeField] private float _minimumHeight;
+    [SerializeField] private float _maximumHeight;
+    [SerializeField] private float _minimumSpeed;
+    [SerializeField] private float _maximumSpeed;
+    [SerializeField] private float _minimumLifetime;
+    [SerializeField] private float _maximumLifetime;
+    [SerializeField] private int _maximumButterflies;
     [SerializeField] private float _spawnInterval;
     [SerializeField] private int _initialCount;
     [SerializeField] private float _globalScale;
 
     private ObjectPool<Butterfly> _pool;
-    private List<Butterfly> _active;
+    private List<Butterfly> _activeButterflies;
+    private WaitForSeconds _spawnIntervalWait;
 
     private void Awake()
     {
-        _active = new List<Butterfly>();
+        _activeButterflies = new List<Butterfly>();
+        _spawnIntervalWait = new WaitForSeconds(_spawnInterval);
+
         _pool = new ObjectPool<Butterfly>(
             createFunc: CreateButterfly,
-            actionOnGet: OnGetButterfly,
-            actionOnRelease: OnReleaseButterfly,
-            actionOnDestroy: b =>
-            {
-                b.OnDeath -= OnButterflyDeath;
-                Destroy(b.gameObject);
-            },
+            actionOnGet: GetButterfly,
+            actionOnRelease: ReleaseButterfly,
+            actionOnDestroy: DestroyButterfly,
             collectionCheck: false,
-            defaultCapacity: _maxButterflies,
-            maxSize: _maxButterflies
+            defaultCapacity: _maximumButterflies,
+            maxSize: _maximumButterflies
         );
     }
 
@@ -48,33 +49,48 @@ public class ButterflySpawner : MonoBehaviour
         StartCoroutine(SpawnRoutine());
     }
 
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(1f, 0.8f, 0f, GizmoAlpha);
+        Gizmos.DrawCube(_spawnBounds.center, _spawnBounds.size);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(_spawnBounds.center, _spawnBounds.size);
+    }
+
     private Butterfly CreateButterfly()
     {
-        Butterfly b = Instantiate(_butterflyPrefab, transform);
-        b.OnDeath += OnButterflyDeath;
-        return b;
+        Butterfly butterfly = Instantiate(_butterflyPrefab, transform);
+        butterfly.Died += OnButterflyDied;
+        return butterfly;
     }
 
-    private void OnGetButterfly(Butterfly b)
+    private void DestroyButterfly(Butterfly butterfly)
     {
-        b.gameObject.SetActive(true);
-        _active.Add(b);
+        butterfly.Died -= OnButterflyDied;
+        Destroy(butterfly.gameObject);
     }
 
-    private void OnReleaseButterfly(Butterfly b)
+    private void GetButterfly(Butterfly butterfly)
     {
-        b.gameObject.SetActive(false);
-        _active.Remove(b);
+        butterfly.gameObject.SetActive(true);
+        _activeButterflies.Add(butterfly);
     }
 
-    private void OnButterflyDeath(Butterfly b)
+    private void ReleaseButterfly(Butterfly butterfly)
     {
-        _pool.Release(b);
+        butterfly.gameObject.SetActive(false);
+        _activeButterflies.Remove(butterfly);
+    }
+
+    private void OnButterflyDied(Butterfly butterfly)
+    {
+        _pool.Release(butterfly);
     }
 
     private void Spawn()
     {
-        if (_active.Count >= _maxButterflies)
+        if (_activeButterflies.Count >= _maximumButterflies)
             return;
 
         if (_sprites == null || _sprites.Length == 0)
@@ -83,41 +99,30 @@ public class ButterflySpawner : MonoBehaviour
             return;
         }
 
-        Butterfly b = _pool.Get();
+        Butterfly butterfly = _pool.Get();
 
-        Vector3 pos = new Vector3(
+        Vector3 position = new Vector3(
             Random.Range(_spawnBounds.min.x, _spawnBounds.max.x),
-            Random.Range(_minHeight, _maxHeight),
+            Random.Range(_minimumHeight, _maximumHeight),
             Random.Range(_spawnBounds.min.z, _spawnBounds.max.z)
         );
 
-        b.transform.position = pos;
-        b.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+        butterfly.transform.position = position;
+        butterfly.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
 
         Sprite sprite = _sprites[Random.Range(0, _sprites.Length)];
-        float speed = Random.Range(_minSpeed, _maxSpeed);
-        float lifetime = Random.Range(_minLifetime, _maxLifetime);
+        float speed = Random.Range(_minimumSpeed, _maximumSpeed);
+        float lifetime = Random.Range(_minimumLifetime, _maximumLifetime);
 
-        b.Initialize(sprite, _spawnBounds, _minHeight, _maxHeight, speed, lifetime, _globalScale);
+        butterfly.Initialize(sprite, _spawnBounds, _minimumHeight, _maximumHeight, speed, lifetime, _globalScale);
     }
 
     private IEnumerator SpawnRoutine()
     {
-        WaitForSeconds interval = new WaitForSeconds(_spawnInterval);
-
         while (enabled)
         {
-            yield return interval;
+            yield return _spawnIntervalWait;
             Spawn();
         }
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = new Color(1f, 0.8f, 0f, 0.3f);
-        Gizmos.DrawCube(_spawnBounds.center, _spawnBounds.size);
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(_spawnBounds.center, _spawnBounds.size);
     }
 }

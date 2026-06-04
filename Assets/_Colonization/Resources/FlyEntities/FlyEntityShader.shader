@@ -39,49 +39,49 @@ Shader "Custom/FlyEntity"
             float _Alpha;
             float _Scale;
 
-            struct appdata
+            struct Attributes
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
             };
 
-            struct v2f
+            struct VertexToFragment
             {
-                float4 pos : SV_POSITION;
+                float4 position : SV_POSITION;
                 float2 uv : TEXCOORD0;
             };
 
-            v2f vert(appdata v)
+            VertexToFragment vert(Attributes input)
             {
-                float3 localPos = v.vertex.xyz * _Scale;
+                float3 localPosition = input.vertex.xyz * _Scale;
 
                 float flapAngle = sin(_Time.y * _FlapSpeed) * _FlapAngle;
 
                 float wingFlap = 0;
-                float u = v.uv.x;
+                float uvX = input.uv.x;
 
-                if (u < 1.0 / 3.0)
+                if (uvX < 1.0 / 3.0)
                     wingFlap = flapAngle;
-                else if (u > 2.0 / 3.0)
+                else if (uvX > 2.0 / 3.0)
                     wingFlap = -flapAngle;
 
-                float s = sin(wingFlap);
-                float c = cos(wingFlap);
+                float sinFlap = sin(wingFlap);
+                float cosFlap = cos(wingFlap);
 
-                float3 wingPos;
-                wingPos.x = localPos.x * c - localPos.y * s;
-                wingPos.y = localPos.x * s + localPos.y * c;
-                wingPos.z = localPos.z;
+                float3 wingPosition;
+                wingPosition.x = localPosition.x * cosFlap - localPosition.y * sinFlap;
+                wingPosition.y = localPosition.x * sinFlap + localPosition.y * cosFlap;
+                wingPosition.z = localPosition.z;
 
-                v2f o;
-                o.pos = TransformObjectToHClip(wingPos);
-                o.uv = v.uv;
-                return o;
+                VertexToFragment output;
+                output.position = TransformObjectToHClip(wingPosition);
+                output.uv = input.uv;
+                return output;
             }
 
-            half4 frag(v2f i) : SV_Target
+            half4 frag(VertexToFragment input) : SV_Target
             {
-                half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
+                half4 color = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
                 color.a *= _Alpha;
                 clip(color.a - 0.01);
                 return color;

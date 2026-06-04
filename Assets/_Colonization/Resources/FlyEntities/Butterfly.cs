@@ -4,6 +4,20 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class Butterfly : MonoBehaviour
 {
+    private const float FadeDuration = 1f;
+    private const float ArrivedThreshold = 1f;
+    private const float DirectionEpsilon = 0.001f;
+    private const float RotationSmoothTime = 2f;
+    private const float WobbleFrequencyBase = 3f;
+    private const float WobbleFrequencyRange = 0.5f;
+    private const float WobbleAmplitude = 0.5f;
+    private const float BobFrequency = 2f;
+    private const float BobAmplitude = 0.3f;
+
+    private readonly int _mainTexPropertyId = Shader.PropertyToID("_MainTex");
+    private readonly int _alphaPropertyId = Shader.PropertyToID("_Alpha");
+    private readonly int _scalePropertyId = Shader.PropertyToID("_Scale");
+
     [SerializeField] private MeshRenderer _meshRenderer;
 
     private MeshFilter _meshFilter;
@@ -12,38 +26,34 @@ public class Butterfly : MonoBehaviour
     private float _elapsed;
     private Vector3 _target;
     private Bounds _bounds;
-    private float _minHeight;
-    private float _maxHeight;
+    private float _minimumHeight;
+    private float _maximumHeight;
     private Vector3 _currentDirection;
+    private MaterialPropertyBlock _propertyBlock;
 
-    private MaterialPropertyBlock _props;
-    private static readonly int MainTexProp = Shader.PropertyToID("_MainTex");
-    private static readonly int AlphaProp = Shader.PropertyToID("_Alpha");
-    private static readonly int ScaleProp = Shader.PropertyToID("_Scale");
-
-    public event Action<Butterfly> OnDeath;
+    public event Action<Butterfly> Died;
 
     private void Awake()
     {
         _meshFilter = GetComponent<MeshFilter>();
         _meshRenderer = GetComponent<MeshRenderer>();
-        _props = new MaterialPropertyBlock();
+        _propertyBlock = new MaterialPropertyBlock();
     }
 
     private void OnEnable()
     {
-        _meshRenderer.GetPropertyBlock(_props);
+        _meshRenderer.GetPropertyBlock(_propertyBlock);
     }
 
-    public void Initialize(Sprite sprite, Bounds bounds, float minHeight, float maxHeight, float speed, float lifetime, float scale)
+    public void Initialize(Sprite sprite, Bounds bounds, float minimumHeight, float maximumHeight, float speed, float lifetime, float scale)
     {
-        _meshFilter.mesh = ButterflyMeshBuilder.Build(sprite);
+        _meshFilter.mesh = ButterflyMeshBuilder.BuildMesh(sprite);
 
-        _props.SetTexture(MainTexProp, sprite.texture);
+        _propertyBlock.SetTexture(_mainTexPropertyId, sprite.texture);
 
         _bounds = bounds;
-        _minHeight = minHeight;
-        _maxHeight = maxHeight;
+        _minimumHeight = minimumHeight;
+        _maximumHeight = maximumHeight;
         _speed = speed;
         _lifetime = lifetime;
         _elapsed = 0;
@@ -51,9 +61,9 @@ public class Butterfly : MonoBehaviour
 
         transform.rotation = Quaternion.LookRotation(_currentDirection, Vector3.up);
 
-        _props.SetFloat(ScaleProp, scale);
-        _props.SetFloat(AlphaProp, 0);
-        _meshRenderer.SetPropertyBlock(_props);
+        _propertyBlock.SetFloat(_scalePropertyId, scale);
+        _propertyBlock.SetFloat(_alphaPropertyId, 0);
+        _meshRenderer.SetPropertyBlock(_propertyBlock);
 
         ChooseNewTarget();
     }
@@ -64,21 +74,29 @@ public class Butterfly : MonoBehaviour
 
         if (_elapsed >= _lifetime)
         {
-            OnDeath?.Invoke(this);
+            Died?.Invoke(this);
             return;
         }
 
+        UpdateAlpha();
+        MoveTowardsTarget();
+    }
+
+    private void UpdateAlpha()
+    {
         float alpha = 1;
 
-        if (_elapsed < 1f)
-            alpha = _elapsed / 1f;
-        else if (_elapsed > _lifetime - 1f)
-            alpha = (_lifetime - _elapsed) / 1f;
+        if (_elapsed < FadeDuration)
+        {
+            alpha = _elapsed / FadeDuration;
+        }
+        else if (_elapsed > _lifetime - FadeDuration)
+        {
+            alpha = (_lifetime - _elapsed) / FadeDuration;
+        }
 
-        _props.SetFloat(AlphaProp, alpha);
-        _meshRenderer.SetPropertyBlock(_props);
-
-        MoveTowardsTarget();
+        _propertyBlock.SetFloat(_alphaPropertyId, alpha);
+        _meshRenderer.SetPropertyBlock(_propertyBlock);
     }
 
     private void MoveTowardsTarget()
@@ -86,7 +104,7 @@ public class Butterfly : MonoBehaviour
         Vector3 toTarget = _target - transform.position;
         float distance = toTarget.magnitude;
 
-        if (distance < 1f)
+        if (distance < ArrivedThreshold)
         {
             ChooseNewTarget();
             return;
@@ -95,26 +113,23 @@ public class Butterfly : MonoBehaviour
         Vector3 direction = toTarget.normalized;
         Vector3 moveStep = direction * _speed * Time.deltaTime;
 
-        Vector3 lateralDir = Vector3.Cross(direction, Vector3.up).normalized;
+        Vector3 lateralDirection = Vector3.Cross(direction, Vector3.up).normalized;
 
-        if (lateralDir == Vector3.zero)
-            lateralDir = Vector3.right;
+        if (lateralDirection == Vector3.zero)
+            lateralDirection = Vector3.right;
 
-        float wobbleFreq = 3f + UnityEngine.Random.Range(-0.5f, 0.5f);
-        float wobbleAmp = 0.5f;
-        float wobble = Mathf.Sin(_elapsed * wobbleFreq) * wobbleAmp * Time.deltaTime;
-        moveStep += lateralDir * wobble;
+        float wobbleFrequency = WobbleFrequencyBase + UnityEngine.Random.Range(-WobbleFrequencyRange, WobbleFrequencyRange);
+        float wobble = Mathf.Sin(_elapsed * wobbleFrequency) * WobbleAmplitude * Time.deltaTime;
+        moveStep += lateralDirection * wobble;
 
-        float bobFreq = 2f;
-        float bobAmp = 0.3f;
-        float bob = Mathf.Sin(_elapsed * bobFreq) * bobAmp * Time.deltaTime;
+        float bob = Mathf.Sin(_elapsed * BobFrequency) * BobAmplitude * Time.deltaTime;
         moveStep += Vector3.up * bob;
 
         transform.position += moveStep;
 
-        _currentDirection = Vector3.Slerp(_currentDirection, direction, Time.deltaTime * 2f);
+        _currentDirection = Vector3.Slerp(_currentDirection, direction, Time.deltaTime * RotationSmoothTime);
 
-        if (_currentDirection.sqrMagnitude > 0.001f)
+        if (_currentDirection.sqrMagnitude > DirectionEpsilon)
             transform.rotation = Quaternion.LookRotation(_currentDirection, Vector3.up);
     }
 
@@ -122,16 +137,16 @@ public class Butterfly : MonoBehaviour
     {
         float x = UnityEngine.Random.Range(_bounds.min.x, _bounds.max.x);
         float z = UnityEngine.Random.Range(_bounds.min.z, _bounds.max.z);
-        float y = UnityEngine.Random.Range(_minHeight, _maxHeight);
+        float y = UnityEngine.Random.Range(_minimumHeight, _maximumHeight);
         _target = new Vector3(x, y, z);
 
-        Vector3 dir = (_target - transform.position).normalized;
+        Vector3 direction = (_target - transform.position).normalized;
 
-        if (dir != Vector3.zero)
+        if (direction != Vector3.zero)
         {
-            _currentDirection = dir;
+            _currentDirection = direction;
 
-            if (_currentDirection.sqrMagnitude > 0.001f)
+            if (_currentDirection.sqrMagnitude > DirectionEpsilon)
                 transform.rotation = Quaternion.LookRotation(_currentDirection, Vector3.up);
         }
     }

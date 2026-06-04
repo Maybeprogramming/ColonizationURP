@@ -525,13 +525,13 @@ MonoBehaviour:
   _spawnBounds:
     m_Center: {x: 0, y: 1, z: 7}
     m_Extent: {x: 30, y: 0, z: 15}
-  _minHeight: 1
-  _maxHeight: 3
-  _minSpeed: 1
-  _maxSpeed: 3
-  _minLifetime: 10
-  _maxLifetime: 20
-  _maxButterflies: 100
+  _minimumHeight: 1
+  _maximumHeight: 3
+  _minimumSpeed: 1
+  _maximumSpeed: 3
+  _minimumLifetime: 10
+  _maximumLifetime: 20
+  _maximumButterflies: 25
   _spawnInterval: 1
   _initialCount: 25
   _globalScale: 0.3

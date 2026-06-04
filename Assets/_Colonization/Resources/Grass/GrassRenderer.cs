@@ -5,23 +5,28 @@ using UnityEngine.Rendering;
 [RequireComponent(typeof(GrassPainter))]
 public class GrassRenderer : MonoBehaviour
 {
+    private const float MeshVertexOffset = 0.01f;
+    private const float BoundsMultiplier = 2f;
+
+    private readonly int _positionsPropertyId = Shader.PropertyToID("_Positions");
+
     [SerializeField] private Mesh _bladeMesh;
     [SerializeField] private Material _grassMaterial;
     [SerializeField] private float _maxViewDistance = 50;
 
     private GrassPainter _painter;
-    private MaterialPropertyBlock _props;
+    private MaterialPropertyBlock _propertyBlock;
     private Bounds _renderBounds;
 
     private void Awake()
     {
         _painter = GetComponent<GrassPainter>();
-        _props = new MaterialPropertyBlock();
+        _propertyBlock = new MaterialPropertyBlock();
 
         if (_bladeMesh == null)
             _bladeMesh = CreateTriangleMesh();
 
-        _renderBounds = new Bounds(transform.position, Vector3.one * _maxViewDistance * 2);
+        _renderBounds = new Bounds(transform.position, Vector3.one * _maxViewDistance * BoundsMultiplier);
     }
 
     private void Update()
@@ -29,7 +34,7 @@ public class GrassRenderer : MonoBehaviour
         if (_painter.PositionsBuffer == null || _grassMaterial == null)
             return;
 
-        _props.SetBuffer("_Positions", _painter.PositionsBuffer);
+        _propertyBlock.SetBuffer(_positionsPropertyId, _painter.PositionsBuffer);
 
         Graphics.DrawMeshInstancedProcedural(
             _bladeMesh,
@@ -37,24 +42,30 @@ public class GrassRenderer : MonoBehaviour
             _grassMaterial,
             _renderBounds,
             _painter.BladeCount,
-            _props,
+            _propertyBlock,
             ShadowCastingMode.On,
             true,
-             gameObject.layer
+            gameObject.layer
         );
     }
 
-    private static Mesh CreateTriangleMesh()
+    private Mesh CreateTriangleMesh()
     {
         Mesh mesh = new Mesh();
-        mesh.vertices = new Vector3[]
+
+        Vector3[] vertices = new Vector3[]
         {
             Vector3.zero,
-            Vector3.right * 0.01f,
-            Vector3.forward * 0.01f
+            Vector3.right * MeshVertexOffset,
+            Vector3.forward * MeshVertexOffset
         };
-        mesh.triangles = new int[] { 0, 1, 2 };
-        mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 0.01f);
+
+        int[] triangles = new int[] { 0, 1, 2 };
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.bounds = new Bounds(Vector3.zero, Vector3.one * MeshVertexOffset);
+
         return mesh;
     }
 }

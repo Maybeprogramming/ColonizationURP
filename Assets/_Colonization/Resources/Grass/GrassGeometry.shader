@@ -56,9 +56,9 @@ Shader "Custom/GrassGeometry"
 
             v2g vert(uint instanceID : SV_InstanceID)
             {
-                v2g o;
-                o.instanceID = instanceID;
-                return o;
+                v2g output;
+                output.instanceID = instanceID;
+                return output;
             }
 
             float GetRandom(float seed)
@@ -91,19 +91,19 @@ Shader "Custom/GrassGeometry"
                 rightVectors[0] = bladeRight;
                 rightVectors[1] = viewDir;
 
-                float2 uvs[12];
-                uvs[0] = float2(0, 0);
-                uvs[1] = float2(1, 0);
-                uvs[2] = float2(0.5, 1);
-                uvs[3] = float2(0.5, 1);
-                uvs[4] = float2(1, 0);
-                uvs[5] = float2(0.5, 1);
-                uvs[6] = float2(0, 0);
-                uvs[7] = float2(1, 0);
-                uvs[8] = float2(0.5, 1);
-                uvs[9] = float2(0.5, 1);
-                uvs[10] = float2(1, 0);
-                uvs[11] = float2(0.5, 1);
+                float2 uvCoordinates[12];
+                uvCoordinates[0] = float2(0, 0);
+                uvCoordinates[1] = float2(1, 0);
+                uvCoordinates[2] = float2(0.5, 1);
+                uvCoordinates[3] = float2(0.5, 1);
+                uvCoordinates[4] = float2(1, 0);
+                uvCoordinates[5] = float2(0.5, 1);
+                uvCoordinates[6] = float2(0, 0);
+                uvCoordinates[7] = float2(1, 0);
+                uvCoordinates[8] = float2(0.5, 1);
+                uvCoordinates[9] = float2(0.5, 1);
+                uvCoordinates[10] = float2(1, 0);
+                uvCoordinates[11] = float2(0.5, 1);
 
                 for (int quad = 0; quad < 2; quad++)
                 {
@@ -119,11 +119,11 @@ Shader "Custom/GrassGeometry"
 
                     for (int i = 0; i < 6; i++)
                     {
-                        g2f o;
-                        o.pos = TransformWorldToHClip(vertices[i]);
-                        o.worldPos = vertices[i];
-                        o.uv = uvs[quad * 6 + i];
-                        stream.Append(o);
+                        g2f output;
+                        output.pos = TransformWorldToHClip(vertices[i]);
+                        output.worldPos = vertices[i];
+                        output.uv = uvCoordinates[quad * 6 + i];
+                        stream.Append(output);
                     }
 
                     stream.RestartStrip();
@@ -181,9 +181,9 @@ Shader "Custom/GrassGeometry"
 
             v2g vert(uint instanceID : SV_InstanceID)
             {
-                v2g o;
-                o.instanceID = instanceID;
-                return o;
+                v2g output;
+                output.instanceID = instanceID;
+                return output;
             }
 
             float GetRandom(float seed)
@@ -233,10 +233,10 @@ Shader "Custom/GrassGeometry"
 
                     for (int i = 0; i < 6; i++)
                     {
-                        g2f o;
+                        g2f output;
                         float3 biased = ApplyShadowBias(vertices[i], normalWS, lightDir);
-                        o.pos = TransformWorldToHClip(biased);
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(biased);
+                        stream.Append(output);
                     }
 
                     stream.RestartStrip();

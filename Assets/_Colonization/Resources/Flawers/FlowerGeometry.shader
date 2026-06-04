@@ -44,6 +44,7 @@ Shader "Custom/FlowerGeometry"
 
             #pragma require geometry
             #pragma target 4.6
+            #define TWO_PI 6.28318530718
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -79,9 +80,9 @@ Shader "Custom/FlowerGeometry"
 
             v2g vert(uint instanceID : SV_InstanceID)
             {
-                v2g o;
-                o.instanceID = instanceID;
-                return o;
+                v2g output;
+                output.instanceID = instanceID;
+                return output;
             }
 
             float GetRandom(float seed)
@@ -91,38 +92,38 @@ Shader "Custom/FlowerGeometry"
 
             void EmitQuad(inout TriangleStream<g2f> stream, float3 a, float3 b, float3 c, float3 d, float2 uvA, float2 uvB, float2 uvC, float2 uvD, float4 color)
             {
-                g2f o;
-                o.color = color;
+                g2f output;
+                output.color = color;
 
-                o.pos = TransformWorldToHClip(a);
-                o.worldPos = a;
-                o.uv = uvA;
-                stream.Append(o);
+                output.pos = TransformWorldToHClip(a);
+                output.worldPos = a;
+                output.uv = uvA;
+                stream.Append(output);
 
-                o.pos = TransformWorldToHClip(c);
-                o.worldPos = c;
-                o.uv = uvC;
-                stream.Append(o);
+                output.pos = TransformWorldToHClip(c);
+                output.worldPos = c;
+                output.uv = uvC;
+                stream.Append(output);
 
-                o.pos = TransformWorldToHClip(b);
-                o.worldPos = b;
-                o.uv = uvB;
-                stream.Append(o);
+                output.pos = TransformWorldToHClip(b);
+                output.worldPos = b;
+                output.uv = uvB;
+                stream.Append(output);
 
-                o.pos = TransformWorldToHClip(b);
-                o.worldPos = b;
-                o.uv = uvB;
-                stream.Append(o);
+                output.pos = TransformWorldToHClip(b);
+                output.worldPos = b;
+                output.uv = uvB;
+                stream.Append(output);
 
-                o.pos = TransformWorldToHClip(c);
-                o.worldPos = c;
-                o.uv = uvC;
-                stream.Append(o);
+                output.pos = TransformWorldToHClip(c);
+                output.worldPos = c;
+                output.uv = uvC;
+                stream.Append(output);
 
-                o.pos = TransformWorldToHClip(d);
-                o.worldPos = d;
-                o.uv = uvD;
-                stream.Append(o);
+                output.pos = TransformWorldToHClip(d);
+                output.worldPos = d;
+                output.uv = uvD;
+                stream.Append(output);
 
                 stream.RestartStrip();
             }
@@ -152,241 +153,241 @@ Shader "Custom/FlowerGeometry"
                 stemAxes[0] = stemRight;
                 stemAxes[1] = viewDir;
 
-                for (int s = 0; s < 2; s++)
+                for (int stemIndex = 0; stemIndex < 2; stemIndex++)
                 {
-                    float3 axis = stemAxes[s];
-                    float3 bL = root + axis * -stemWidth;
-                    float3 bR = root + axis * stemWidth;
-                    float3 tL = stemTop + axis * -stemWidth * 0.3;
-                    float3 tR = stemTop + axis * stemWidth * 0.3;
+                    float3 axis = stemAxes[stemIndex];
+                    float3 bottomLeft = root + axis * -stemWidth;
+                    float3 bottomRight = root + axis * stemWidth;
+                    float3 topLeft = stemTop + axis * -stemWidth * 0.3;
+                    float3 topRight = stemTop + axis * stemWidth * 0.3;
 
-                    g2f o;
-                    o.color = 0;
+                    g2f output;
+                    output.color = 0;
 
-                    o.pos = TransformWorldToHClip(bL);
-                    o.worldPos = bL;
-                    o.uv = float2(0, 0);
-                    o.color = lerp(_StemColorBottom, _StemColorTop, 0);
-                    stream.Append(o);
+                    output.pos = TransformWorldToHClip(bottomLeft);
+                    output.worldPos = bottomLeft;
+                    output.uv = float2(0, 0);
+                    output.color = lerp(_StemColorBottom, _StemColorTop, 0);
+                    stream.Append(output);
 
-                    o.pos = TransformWorldToHClip(tL);
-                    o.worldPos = tL;
-                    o.uv = float2(0.5, 1);
-                    o.color = lerp(_StemColorBottom, _StemColorTop, 1);
-                    stream.Append(o);
+                    output.pos = TransformWorldToHClip(topLeft);
+                    output.worldPos = topLeft;
+                    output.uv = float2(0.5, 1);
+                    output.color = lerp(_StemColorBottom, _StemColorTop, 1);
+                    stream.Append(output);
 
-                    o.pos = TransformWorldToHClip(bR);
-                    o.worldPos = bR;
-                    o.uv = float2(1, 0);
-                    o.color = lerp(_StemColorBottom, _StemColorTop, 0);
-                    stream.Append(o);
+                    output.pos = TransformWorldToHClip(bottomRight);
+                    output.worldPos = bottomRight;
+                    output.uv = float2(1, 0);
+                    output.color = lerp(_StemColorBottom, _StemColorTop, 0);
+                    stream.Append(output);
 
-                    o.pos = TransformWorldToHClip(bR);
-                    o.worldPos = bR;
-                    o.uv = float2(1, 0);
-                    o.color = lerp(_StemColorBottom, _StemColorTop, 0);
-                    stream.Append(o);
+                    output.pos = TransformWorldToHClip(bottomRight);
+                    output.worldPos = bottomRight;
+                    output.uv = float2(1, 0);
+                    output.color = lerp(_StemColorBottom, _StemColorTop, 0);
+                    stream.Append(output);
 
-                    o.pos = TransformWorldToHClip(tL);
-                    o.worldPos = tL;
-                    o.uv = float2(0.5, 1);
-                    o.color = lerp(_StemColorBottom, _StemColorTop, 1);
-                    stream.Append(o);
+                    output.pos = TransformWorldToHClip(topLeft);
+                    output.worldPos = topLeft;
+                    output.uv = float2(0.5, 1);
+                    output.color = lerp(_StemColorBottom, _StemColorTop, 1);
+                    stream.Append(output);
 
-                    o.pos = TransformWorldToHClip(tR);
-                    o.worldPos = tR;
-                    o.uv = float2(0.5, 1);
-                    o.color = lerp(_StemColorBottom, _StemColorTop, 1);
-                    stream.Append(o);
+                    output.pos = TransformWorldToHClip(topRight);
+                    output.worldPos = topRight;
+                    output.uv = float2(0.5, 1);
+                    output.color = lerp(_StemColorBottom, _StemColorTop, 1);
+                    stream.Append(output);
 
                     stream.RestartStrip();
                 }
 
-                float typeRand = GetRandom(seed + 5);
-                int ft = (int)(typeRand * 3);
+                float randomType = GetRandom(seed + 5);
+                int flowerType = (int)(randomType * 3);
 
-                if (ft == 0)
+                if (flowerType == 0)
                 {
                     int daisyPetals = 8;
-                    float daisyLen = headSize * 0.5;
+                    float daisyPetalLength = headSize * 0.5;
 
-                    for (int p = 0; p < daisyPetals; p++)
+                    for (int petalIndex = 0; petalIndex < daisyPetals; petalIndex++)
                     {
-                        float angle = (float)p / daisyPetals * 6.28319;
+                        float angle = (float)petalIndex / daisyPetals * TWO_PI;
                         float3 outward = float3(cos(angle), 0, sin(angle));
                         float3 widthDir = normalize(cross(outward, float3(0, 1, 0)));
 
                         float3 base = stemTop + outward * headSize * 0.04;
-                        float3 tip = stemTop + outward * (headSize * 0.04 + daisyLen) + float3(0, headSize * 0.12, 0);
+                        float3 tip = stemTop + outward * (headSize * 0.04 + daisyPetalLength) + float3(0, headSize * 0.12, 0);
 
-                        float baseHW = headSize * 0.035;
-                        float tipHW = headSize * 0.065;
+                        float baseHalfWidth = headSize * 0.035;
+                        float tipHalfWidth = headSize * 0.065;
 
-                        float3 bL = base + widthDir * -baseHW;
-                        float3 bR = base + widthDir * baseHW;
-                        float3 tL = tip + widthDir * -tipHW;
-                        float3 tR = tip + widthDir * tipHW;
+                        float3 bottomLeft = base + widthDir * -baseHalfWidth;
+                        float3 bottomRight = base + widthDir * baseHalfWidth;
+                        float3 topLeft = tip + widthDir * -tipHalfWidth;
+                        float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        g2f o;
-                        o.color = 0;
+                        g2f output;
+                        output.color = 0;
 
-                        o.pos = TransformWorldToHClip(bL);
-                        o.worldPos = bL;
-                        o.uv = float2(0, 0);
-                        o.color = _DaisyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(bottomLeft);
+                        output.worldPos = bottomLeft;
+                        output.uv = float2(0, 0);
+                        output.color = _DaisyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(tL);
-                        o.worldPos = tL;
-                        o.uv = float2(0, 1);
-                        o.color = _DaisyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(topLeft);
+                        output.worldPos = topLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _DaisyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(bR);
-                        o.worldPos = bR;
-                        o.uv = float2(1, 0);
-                        o.color = _DaisyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(bottomRight);
+                        output.worldPos = bottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _DaisyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(bR);
-                        o.worldPos = bR;
-                        o.uv = float2(1, 0);
-                        o.color = _DaisyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(bottomRight);
+                        output.worldPos = bottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _DaisyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(tL);
-                        o.worldPos = tL;
-                        o.uv = float2(0, 1);
-                        o.color = _DaisyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(topLeft);
+                        output.worldPos = topLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _DaisyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(tR);
-                        o.worldPos = tR;
-                        o.uv = float2(1, 1);
-                        o.color = _DaisyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(topRight);
+                        output.worldPos = topRight;
+                        output.uv = float2(1, 1);
+                        output.color = _DaisyColor;
+                        stream.Append(output);
 
                         stream.RestartStrip();
                     }
 
-                    float cSize = headSize * 0.08;
-                    float3 cUp = stemTop + float3(0, cSize * 0.3, 0);
-                    float3 cView = _WorldSpaceCameraPos - cUp;
-                    cView.y = 0;
-                    cView = normalize(cView);
-                    float3 cRight = normalize(cross(float3(0, 1, 0), cView));
+                    float centerSize = headSize * 0.08;
+                    float3 centerUp = stemTop + float3(0, centerSize * 0.3, 0);
+                    float3 centerViewDir = _WorldSpaceCameraPos - centerUp;
+                    centerViewDir.y = 0;
+                    centerViewDir = normalize(centerViewDir);
+                    float3 centerRight = normalize(cross(float3(0, 1, 0), centerViewDir));
 
-                    for (int cq = 0; cq < 2; cq++)
+                    for (int centerQuadIndex = 0; centerQuadIndex < 2; centerQuadIndex++)
                     {
-                        float3 ca = (cq == 0) ? cRight : cView;
-                        float3 cBL = cUp + ca * -cSize + float3(0, -cSize * 0.5, 0);
-                        float3 cBR = cUp + ca * cSize + float3(0, -cSize * 0.5, 0);
-                        float3 cTL = cUp + ca * -cSize + float3(0, cSize * 0.5, 0);
-                        float3 cTR = cUp + ca * cSize + float3(0, cSize * 0.5, 0);
+                        float3 centerAxis = (centerQuadIndex == 0) ? centerRight : centerViewDir;
+                        float3 centerBottomLeft = centerUp + centerAxis * -centerSize + float3(0, -centerSize * 0.5, 0);
+                        float3 centerBottomRight = centerUp + centerAxis * centerSize + float3(0, -centerSize * 0.5, 0);
+                        float3 centerTopLeft = centerUp + centerAxis * -centerSize + float3(0, centerSize * 0.5, 0);
+                        float3 centerTopRight = centerUp + centerAxis * centerSize + float3(0, centerSize * 0.5, 0);
 
-                        g2f o;
-                        o.color = 0;
+                        g2f output;
+                        output.color = 0;
 
-                        o.pos = TransformWorldToHClip(cBL);
-                        o.worldPos = cBL;
-                        o.uv = float2(0, 0);
-                        o.color = _DaisyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerBottomLeft);
+                        output.worldPos = centerBottomLeft;
+                        output.uv = float2(0, 0);
+                        output.color = _DaisyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cTL);
-                        o.worldPos = cTL;
-                        o.uv = float2(0, 1);
-                        o.color = _DaisyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerTopLeft);
+                        output.worldPos = centerTopLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _DaisyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cBR);
-                        o.worldPos = cBR;
-                        o.uv = float2(1, 0);
-                        o.color = _DaisyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerBottomRight);
+                        output.worldPos = centerBottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _DaisyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cBR);
-                        o.worldPos = cBR;
-                        o.uv = float2(1, 0);
-                        o.color = _DaisyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerBottomRight);
+                        output.worldPos = centerBottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _DaisyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cTL);
-                        o.worldPos = cTL;
-                        o.uv = float2(0, 1);
-                        o.color = _DaisyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerTopLeft);
+                        output.worldPos = centerTopLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _DaisyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cTR);
-                        o.worldPos = cTR;
-                        o.uv = float2(1, 1);
-                        o.color = _DaisyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerTopRight);
+                        output.worldPos = centerTopRight;
+                        output.uv = float2(1, 1);
+                        output.color = _DaisyCenter;
+                        stream.Append(output);
 
                         stream.RestartStrip();
                     }
                 }
-                else if (ft == 1)
+                else if (flowerType == 1)
                 {
                     int tulipPetals = 5;
-                    float tHeight = headSize * 0.4;
+                    float tulipHeight = headSize * 0.4;
 
-                    for (int p = 0; p < tulipPetals; p++)
+                    for (int petalIndex = 0; petalIndex < tulipPetals; petalIndex++)
                     {
-                        float angle = (float)p / tulipPetals * 6.28319;
+                        float angle = (float)petalIndex / tulipPetals * TWO_PI;
                         float3 outward = float3(cos(angle), 0, sin(angle));
                         float3 widthDir = normalize(cross(outward, float3(0, 1, 0)));
 
                         float3 base = stemTop + outward * headSize * 0.02;
-                        float3 tip = stemTop + outward * headSize * 0.35 + float3(0, tHeight, 0);
+                        float3 tip = stemTop + outward * headSize * 0.35 + float3(0, tulipHeight, 0);
                         tip += outward * headSize * 0.1;
 
-                        float baseHW = headSize * 0.18;
-                        float tipHW = headSize * 0.35;
+                        float baseHalfWidth = headSize * 0.18;
+                        float tipHalfWidth = headSize * 0.35;
 
-                        float3 bL = base + widthDir * -baseHW;
-                        float3 bR = base + widthDir * baseHW;
-                        float3 tL = tip + widthDir * -tipHW;
-                        float3 tR = tip + widthDir * tipHW;
+                        float3 bottomLeft = base + widthDir * -baseHalfWidth;
+                        float3 bottomRight = base + widthDir * baseHalfWidth;
+                        float3 topLeft = tip + widthDir * -tipHalfWidth;
+                        float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        g2f o;
-                        o.color = 0;
+                        g2f output;
+                        output.color = 0;
 
-                        o.pos = TransformWorldToHClip(bL);
-                        o.worldPos = bL;
-                        o.uv = float2(0, 0);
-                        o.color = _TulipColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(bottomLeft);
+                        output.worldPos = bottomLeft;
+                        output.uv = float2(0, 0);
+                        output.color = _TulipColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(tL);
-                        o.worldPos = tL;
-                        o.uv = float2(0, 1);
-                        o.color = _TulipColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(topLeft);
+                        output.worldPos = topLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _TulipColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(bR);
-                        o.worldPos = bR;
-                        o.uv = float2(1, 0);
-                        o.color = _TulipColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(bottomRight);
+                        output.worldPos = bottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _TulipColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(bR);
-                        o.worldPos = bR;
-                        o.uv = float2(1, 0);
-                        o.color = _TulipColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(bottomRight);
+                        output.worldPos = bottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _TulipColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(tL);
-                        o.worldPos = tL;
-                        o.uv = float2(0, 1);
-                        o.color = _TulipColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(topLeft);
+                        output.worldPos = topLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _TulipColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(tR);
-                        o.worldPos = tR;
-                        o.uv = float2(1, 1);
-                        o.color = _TulipColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(topRight);
+                        output.worldPos = topRight;
+                        output.uv = float2(1, 1);
+                        output.color = _TulipColor;
+                        stream.Append(output);
 
                         stream.RestartStrip();
                     }
@@ -394,121 +395,121 @@ Shader "Custom/FlowerGeometry"
                 else
                 {
                     int poppyPetals = 4;
-                    float pLen = headSize * 0.35;
+                    float poppyPetalLength = headSize * 0.35;
 
-                    for (int p = 0; p < poppyPetals; p++)
+                    for (int petalIndex = 0; petalIndex < poppyPetals; petalIndex++)
                     {
-                        float angle = (float)p / poppyPetals * 6.28319;
+                        float angle = (float)petalIndex / poppyPetals * TWO_PI;
                         float3 outward = float3(cos(angle), 0, sin(angle));
                         float3 widthDir = normalize(cross(outward, float3(0, 1, 0)));
 
                         float3 base = stemTop + outward * headSize * 0.04;
-                        float3 tip = stemTop + outward * (headSize * 0.04 + pLen) + float3(0, headSize * 0.18, 0);
+                        float3 tip = stemTop + outward * (headSize * 0.04 + poppyPetalLength) + float3(0, headSize * 0.18, 0);
                         tip += float3(0, -headSize * 0.04, 0);
 
-                        float baseHW = headSize * 0.18;
-                        float tipHW = headSize * 0.5;
+                        float baseHalfWidth = headSize * 0.18;
+                        float tipHalfWidth = headSize * 0.5;
 
-                        float3 bL = base + widthDir * -baseHW;
-                        float3 bR = base + widthDir * baseHW;
-                        float3 tL = tip + widthDir * -tipHW;
-                        float3 tR = tip + widthDir * tipHW;
+                        float3 bottomLeft = base + widthDir * -baseHalfWidth;
+                        float3 bottomRight = base + widthDir * baseHalfWidth;
+                        float3 topLeft = tip + widthDir * -tipHalfWidth;
+                        float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        g2f o;
-                        o.color = 0;
+                        g2f output;
+                        output.color = 0;
 
-                        o.pos = TransformWorldToHClip(bL);
-                        o.worldPos = bL;
-                        o.uv = float2(0, 0);
-                        o.color = _PoppyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(bottomLeft);
+                        output.worldPos = bottomLeft;
+                        output.uv = float2(0, 0);
+                        output.color = _PoppyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(tL);
-                        o.worldPos = tL;
-                        o.uv = float2(0, 1);
-                        o.color = _PoppyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(topLeft);
+                        output.worldPos = topLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _PoppyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(bR);
-                        o.worldPos = bR;
-                        o.uv = float2(1, 0);
-                        o.color = _PoppyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(bottomRight);
+                        output.worldPos = bottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _PoppyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(bR);
-                        o.worldPos = bR;
-                        o.uv = float2(1, 0);
-                        o.color = _PoppyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(bottomRight);
+                        output.worldPos = bottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _PoppyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(tL);
-                        o.worldPos = tL;
-                        o.uv = float2(0, 1);
-                        o.color = _PoppyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(topLeft);
+                        output.worldPos = topLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _PoppyColor;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(tR);
-                        o.worldPos = tR;
-                        o.uv = float2(1, 1);
-                        o.color = _PoppyColor;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(topRight);
+                        output.worldPos = topRight;
+                        output.uv = float2(1, 1);
+                        output.color = _PoppyColor;
+                        stream.Append(output);
 
                         stream.RestartStrip();
                     }
 
-                    float cSize = headSize * 0.09;
-                    float3 cUp = stemTop + float3(0, cSize * 0.25, 0);
-                    float3 cView = _WorldSpaceCameraPos - cUp;
-                    cView.y = 0;
-                    cView = normalize(cView);
-                    float3 cRight = normalize(cross(float3(0, 1, 0), cView));
+                    float centerSize = headSize * 0.09;
+                    float3 centerUp = stemTop + float3(0, centerSize * 0.25, 0);
+                    float3 centerViewDir = _WorldSpaceCameraPos - centerUp;
+                    centerViewDir.y = 0;
+                    centerViewDir = normalize(centerViewDir);
+                    float3 centerRight = normalize(cross(float3(0, 1, 0), centerViewDir));
 
-                    for (int cq = 0; cq < 2; cq++)
+                    for (int centerQuadIndex = 0; centerQuadIndex < 2; centerQuadIndex++)
                     {
-                        float3 ca = (cq == 0) ? cRight : cView;
-                        float3 cBL = cUp + ca * -cSize + float3(0, -cSize * 0.5, 0);
-                        float3 cBR = cUp + ca * cSize + float3(0, -cSize * 0.5, 0);
-                        float3 cTL = cUp + ca * -cSize + float3(0, cSize * 0.5, 0);
-                        float3 cTR = cUp + ca * cSize + float3(0, cSize * 0.5, 0);
+                        float3 centerAxis = (centerQuadIndex == 0) ? centerRight : centerViewDir;
+                        float3 centerBottomLeft = centerUp + centerAxis * -centerSize + float3(0, -centerSize * 0.5, 0);
+                        float3 centerBottomRight = centerUp + centerAxis * centerSize + float3(0, -centerSize * 0.5, 0);
+                        float3 centerTopLeft = centerUp + centerAxis * -centerSize + float3(0, centerSize * 0.5, 0);
+                        float3 centerTopRight = centerUp + centerAxis * centerSize + float3(0, centerSize * 0.5, 0);
 
-                        g2f o;
-                        o.color = 0;
+                        g2f output;
+                        output.color = 0;
 
-                        o.pos = TransformWorldToHClip(cBL);
-                        o.worldPos = cBL;
-                        o.uv = float2(0, 0);
-                        o.color = _PoppyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerBottomLeft);
+                        output.worldPos = centerBottomLeft;
+                        output.uv = float2(0, 0);
+                        output.color = _PoppyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cTL);
-                        o.worldPos = cTL;
-                        o.uv = float2(0, 1);
-                        o.color = _PoppyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerTopLeft);
+                        output.worldPos = centerTopLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _PoppyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cBR);
-                        o.worldPos = cBR;
-                        o.uv = float2(1, 0);
-                        o.color = _PoppyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerBottomRight);
+                        output.worldPos = centerBottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _PoppyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cBR);
-                        o.worldPos = cBR;
-                        o.uv = float2(1, 0);
-                        o.color = _PoppyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerBottomRight);
+                        output.worldPos = centerBottomRight;
+                        output.uv = float2(1, 0);
+                        output.color = _PoppyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cTL);
-                        o.worldPos = cTL;
-                        o.uv = float2(0, 1);
-                        o.color = _PoppyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerTopLeft);
+                        output.worldPos = centerTopLeft;
+                        output.uv = float2(0, 1);
+                        output.color = _PoppyCenter;
+                        stream.Append(output);
 
-                        o.pos = TransformWorldToHClip(cTR);
-                        o.worldPos = cTR;
-                        o.uv = float2(1, 1);
-                        o.color = _PoppyCenter;
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(centerTopRight);
+                        output.worldPos = centerTopRight;
+                        output.uv = float2(1, 1);
+                        output.color = _PoppyCenter;
+                        stream.Append(output);
 
                         stream.RestartStrip();
                     }
@@ -539,6 +540,7 @@ Shader "Custom/FlowerGeometry"
 
             #pragma require geometry
             #pragma target 4.6
+            #define TWO_PI 6.28318530718
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
@@ -564,9 +566,9 @@ Shader "Custom/FlowerGeometry"
 
             v2g vert(uint instanceID : SV_InstanceID)
             {
-                v2g o;
-                o.instanceID = instanceID;
-                return o;
+                v2g output;
+                output.instanceID = instanceID;
+                return output;
             }
 
             float GetRandom(float seed)
@@ -602,117 +604,117 @@ Shader "Custom/FlowerGeometry"
                 stemAxes[0] = stemRight;
                 stemAxes[1] = viewDir;
 
-                for (int s = 0; s < 2; s++)
+                for (int stemIndex = 0; stemIndex < 2; stemIndex++)
                 {
-                    float3 axis = stemAxes[s];
-                    float3 bL = root + axis * -stemWidth;
-                    float3 bR = root + axis * stemWidth;
-                    float3 tL = stemTop + axis * -stemWidth * 0.3;
-                    float3 tR = stemTop + axis * stemWidth * 0.3;
+                    float3 axis = stemAxes[stemIndex];
+                    float3 bottomLeft = root + axis * -stemWidth;
+                    float3 bottomRight = root + axis * stemWidth;
+                    float3 topLeft = stemTop + axis * -stemWidth * 0.3;
+                    float3 topRight = stemTop + axis * stemWidth * 0.3;
 
-                    float3 verts[6] = { bL, tL, bR, bR, tL, tR };
+                    float3 verts[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
                     for (int i = 0; i < 6; i++)
                     {
-                        g2f o;
+                        g2f output;
                         float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
-                        o.pos = TransformWorldToHClip(biased);
-                        stream.Append(o);
+                        output.pos = TransformWorldToHClip(biased);
+                        stream.Append(output);
                     }
                     stream.RestartStrip();
                 }
 
-                float typeRand = GetRandom(seed + 5);
-                int ft = (int)(typeRand * 3);
+                float randomType = GetRandom(seed + 5);
+                int flowerType = (int)(randomType * 3);
 
-                if (ft == 0)
+                if (flowerType == 0)
                 {
                     int daisyPetals = 8;
-                    float daisyLen = headSize * 0.5;
+                    float daisyPetalLength = headSize * 0.5;
 
-                    for (int p = 0; p < daisyPetals; p++)
+                    for (int petalIndex = 0; petalIndex < daisyPetals; petalIndex++)
                     {
-                        float angle = (float)p / daisyPetals * 6.28319;
+                        float angle = (float)petalIndex / daisyPetals * TWO_PI;
                         float3 outward = float3(cos(angle), 0, sin(angle));
                         float3 widthDir = normalize(cross(outward, float3(0, 1, 0)));
 
                         float3 base = stemTop + outward * headSize * 0.04;
-                        float3 tip = stemTop + outward * (headSize * 0.04 + daisyLen) + float3(0, headSize * 0.12, 0);
+                        float3 tip = stemTop + outward * (headSize * 0.04 + daisyPetalLength) + float3(0, headSize * 0.12, 0);
 
-                        float baseHW = headSize * 0.035;
-                        float tipHW = headSize * 0.065;
+                        float baseHalfWidth = headSize * 0.035;
+                        float tipHalfWidth = headSize * 0.065;
 
-                        float3 bL = base + widthDir * -baseHW;
-                        float3 bR = base + widthDir * baseHW;
-                        float3 tL = tip + widthDir * -tipHW;
-                        float3 tR = tip + widthDir * tipHW;
+                        float3 bottomLeft = base + widthDir * -baseHalfWidth;
+                        float3 bottomRight = base + widthDir * baseHalfWidth;
+                        float3 topLeft = tip + widthDir * -tipHalfWidth;
+                        float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        float3 verts[6] = { bL, tL, bR, bR, tL, tR };
+                        float3 verts[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f o;
+                            g2f output;
                             float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
-                            o.pos = TransformWorldToHClip(biased);
-                            stream.Append(o);
+                            output.pos = TransformWorldToHClip(biased);
+                            stream.Append(output);
                         }
                         stream.RestartStrip();
                     }
 
-                    float cSize = headSize * 0.08;
-                    float3 cUp = stemTop + float3(0, cSize * 0.3, 0);
-                    float3 cCamDir = _WorldSpaceCameraPos - cUp;
-                    cCamDir.y = 0;
-                    cCamDir = normalize(cCamDir);
-                    float3 cRightDir = normalize(cross(float3(0, 1, 0), cCamDir));
+                    float centerSize = headSize * 0.08;
+                    float3 centerUp = stemTop + float3(0, centerSize * 0.3, 0);
+                    float3 centerCamDir = _WorldSpaceCameraPos - centerUp;
+                    centerCamDir.y = 0;
+                    centerCamDir = normalize(centerCamDir);
+                    float3 centerRightDir = normalize(cross(float3(0, 1, 0), centerCamDir));
 
-                    for (int cq = 0; cq < 2; cq++)
+                    for (int centerQuadIndex = 0; centerQuadIndex < 2; centerQuadIndex++)
                     {
-                        float3 ca = (cq == 0) ? cRightDir : cCamDir;
-                        float3 cBL = cUp + ca * -cSize + float3(0, -cSize * 0.5, 0);
-                        float3 cBR = cUp + ca * cSize + float3(0, -cSize * 0.5, 0);
-                        float3 cTL = cUp + ca * -cSize + float3(0, cSize * 0.5, 0);
-                        float3 cTR = cUp + ca * cSize + float3(0, cSize * 0.5, 0);
+                        float3 centerAxis = (centerQuadIndex == 0) ? centerRightDir : centerCamDir;
+                        float3 centerBottomLeft = centerUp + centerAxis * -centerSize + float3(0, -centerSize * 0.5, 0);
+                        float3 centerBottomRight = centerUp + centerAxis * centerSize + float3(0, -centerSize * 0.5, 0);
+                        float3 centerTopLeft = centerUp + centerAxis * -centerSize + float3(0, centerSize * 0.5, 0);
+                        float3 centerTopRight = centerUp + centerAxis * centerSize + float3(0, centerSize * 0.5, 0);
 
-                        float3 verts[6] = { cBL, cTL, cBR, cBR, cTL, cTR };
+                        float3 verts[6] = { centerBottomLeft, centerTopLeft, centerBottomRight, centerBottomRight, centerTopLeft, centerTopRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f o;
+                            g2f output;
                             float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
-                            o.pos = TransformWorldToHClip(biased);
-                            stream.Append(o);
+                            output.pos = TransformWorldToHClip(biased);
+                            stream.Append(output);
                         }
                         stream.RestartStrip();
                     }
                 }
-                else if (ft == 1)
+                else if (flowerType == 1)
                 {
                     int tulipPetals = 5;
-                    float tHeight = headSize * 0.4;
+                    float tulipHeight = headSize * 0.4;
 
-                    for (int p = 0; p < tulipPetals; p++)
+                    for (int petalIndex = 0; petalIndex < tulipPetals; petalIndex++)
                     {
-                        float angle = (float)p / tulipPetals * 6.28319;
+                        float angle = (float)petalIndex / tulipPetals * TWO_PI;
                         float3 outward = float3(cos(angle), 0, sin(angle));
                         float3 widthDir = normalize(cross(outward, float3(0, 1, 0)));
 
                         float3 base = stemTop + outward * headSize * 0.02;
-                        float3 tip = stemTop + outward * headSize * 0.35 + float3(0, tHeight, 0);
+                        float3 tip = stemTop + outward * headSize * 0.35 + float3(0, tulipHeight, 0);
                         tip += outward * headSize * 0.1;
 
-                        float baseHW = headSize * 0.18;
-                        float tipHW = headSize * 0.35;
+                        float baseHalfWidth = headSize * 0.18;
+                        float tipHalfWidth = headSize * 0.35;
 
-                        float3 bL = base + widthDir * -baseHW;
-                        float3 bR = base + widthDir * baseHW;
-                        float3 tL = tip + widthDir * -tipHW;
-                        float3 tR = tip + widthDir * tipHW;
+                        float3 bottomLeft = base + widthDir * -baseHalfWidth;
+                        float3 bottomRight = base + widthDir * baseHalfWidth;
+                        float3 topLeft = tip + widthDir * -tipHalfWidth;
+                        float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        float3 verts[6] = { bL, tL, bR, bR, tL, tR };
+                        float3 verts[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f o;
+                            g2f output;
                             float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
-                            o.pos = TransformWorldToHClip(biased);
-                            stream.Append(o);
+                            output.pos = TransformWorldToHClip(biased);
+                            stream.Append(output);
                         }
                         stream.RestartStrip();
                     }
@@ -720,59 +722,59 @@ Shader "Custom/FlowerGeometry"
                 else
                 {
                     int poppyPetals = 4;
-                    float pLen = headSize * 0.35;
+                    float poppyPetalLength = headSize * 0.35;
 
-                    for (int p = 0; p < poppyPetals; p++)
+                    for (int petalIndex = 0; petalIndex < poppyPetals; petalIndex++)
                     {
-                        float angle = (float)p / poppyPetals * 6.28319;
+                        float angle = (float)petalIndex / poppyPetals * TWO_PI;
                         float3 outward = float3(cos(angle), 0, sin(angle));
                         float3 widthDir = normalize(cross(outward, float3(0, 1, 0)));
 
                         float3 base = stemTop + outward * headSize * 0.04;
-                        float3 tip = stemTop + outward * (headSize * 0.04 + pLen) + float3(0, headSize * 0.18, 0);
+                        float3 tip = stemTop + outward * (headSize * 0.04 + poppyPetalLength) + float3(0, headSize * 0.18, 0);
                         tip += float3(0, -headSize * 0.04, 0);
 
-                        float baseHW = headSize * 0.18;
-                        float tipHW = headSize * 0.5;
+                        float baseHalfWidth = headSize * 0.18;
+                        float tipHalfWidth = headSize * 0.5;
 
-                        float3 bL = base + widthDir * -baseHW;
-                        float3 bR = base + widthDir * baseHW;
-                        float3 tL = tip + widthDir * -tipHW;
-                        float3 tR = tip + widthDir * tipHW;
+                        float3 bottomLeft = base + widthDir * -baseHalfWidth;
+                        float3 bottomRight = base + widthDir * baseHalfWidth;
+                        float3 topLeft = tip + widthDir * -tipHalfWidth;
+                        float3 topRight = tip + widthDir * tipHalfWidth;
 
-                        float3 verts[6] = { bL, tL, bR, bR, tL, tR };
+                        float3 verts[6] = { bottomLeft, topLeft, bottomRight, bottomRight, topLeft, topRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f o;
+                            g2f output;
                             float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
-                            o.pos = TransformWorldToHClip(biased);
-                            stream.Append(o);
+                            output.pos = TransformWorldToHClip(biased);
+                            stream.Append(output);
                         }
                         stream.RestartStrip();
                     }
 
-                    float cSize = headSize * 0.09;
-                    float3 cUp = stemTop + float3(0, cSize * 0.25, 0);
-                    float3 cCamDir = _WorldSpaceCameraPos - cUp;
-                    cCamDir.y = 0;
-                    cCamDir = normalize(cCamDir);
-                    float3 cRightDir = normalize(cross(float3(0, 1, 0), cCamDir));
+                    float centerSize = headSize * 0.09;
+                    float3 centerUp = stemTop + float3(0, centerSize * 0.25, 0);
+                    float3 centerCamDir = _WorldSpaceCameraPos - centerUp;
+                    centerCamDir.y = 0;
+                    centerCamDir = normalize(centerCamDir);
+                    float3 centerRightDir = normalize(cross(float3(0, 1, 0), centerCamDir));
 
-                    for (int cq = 0; cq < 2; cq++)
+                    for (int centerQuadIndex = 0; centerQuadIndex < 2; centerQuadIndex++)
                     {
-                        float3 ca = (cq == 0) ? cRightDir : cCamDir;
-                        float3 cBL = cUp + ca * -cSize + float3(0, -cSize * 0.5, 0);
-                        float3 cBR = cUp + ca * cSize + float3(0, -cSize * 0.5, 0);
-                        float3 cTL = cUp + ca * -cSize + float3(0, cSize * 0.5, 0);
-                        float3 cTR = cUp + ca * cSize + float3(0, cSize * 0.5, 0);
+                        float3 centerAxis = (centerQuadIndex == 0) ? centerRightDir : centerCamDir;
+                        float3 centerBottomLeft = centerUp + centerAxis * -centerSize + float3(0, -centerSize * 0.5, 0);
+                        float3 centerBottomRight = centerUp + centerAxis * centerSize + float3(0, -centerSize * 0.5, 0);
+                        float3 centerTopLeft = centerUp + centerAxis * -centerSize + float3(0, centerSize * 0.5, 0);
+                        float3 centerTopRight = centerUp + centerAxis * centerSize + float3(0, centerSize * 0.5, 0);
 
-                        float3 verts[6] = { cBL, cTL, cBR, cBR, cTL, cTR };
+                        float3 verts[6] = { centerBottomLeft, centerTopLeft, centerBottomRight, centerBottomRight, centerTopLeft, centerTopRight };
                         for (int i = 0; i < 6; i++)
                         {
-                            g2f o;
+                            g2f output;
                             float3 biased = ApplyShadowBias(verts[i], normalWS, lightDir);
-                            o.pos = TransformWorldToHClip(biased);
-                            stream.Append(o);
+                            output.pos = TransformWorldToHClip(biased);
+                            stream.Append(output);
                         }
                         stream.RestartStrip();
                     }
