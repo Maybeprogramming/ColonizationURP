@@ -2,11 +2,10 @@ using UnityEngine;
 
 public class BaseFactory : MonoBehaviour
 {
-    private const int BaseNameMin = 1000;
-    private const int BaseNameMax = 9999;
-
     [SerializeField] private Base _basePrefab;
     [SerializeField] private BotFactory _botFactoryTemplate;
+
+    private int _baseNameID;
 
     private ResourcesData _resourcesData;
     private SpawnerResources _spawner;
@@ -14,28 +13,14 @@ public class BaseFactory : MonoBehaviour
 
     private void Awake()
     {
+        _baseNameID = 0;
         _resourcesData = GameContext.ResourcesData;
         _spawner = GameContext.Spawner;
-
-        if (_resourcesData == null)
-            Debug.LogError($"{nameof(BaseFactory)} on '{name}': {nameof(_resourcesData)} is not assigned. Add {nameof(GameContext)} to scene.", this);
-
-        if (_spawner == null)
-            Debug.LogError($"{nameof(BaseFactory)} on '{name}': {nameof(_spawner)} is not assigned. Add {nameof(GameContext)} to scene.", this);
-
-        if (_botFactoryTemplate == null)
-            Debug.LogError($"{nameof(BaseFactory)} on '{name}': {nameof(_botFactoryTemplate)} is not assigned.", this);
-
         _eventBinder = new BaseEventBinder(_resourcesData, _spawner);
     }
 
     public Base Spawn(Vector3 position)
     {
-        if (!HasDependency(_basePrefab, nameof(_basePrefab), string.Empty)) return null;
-        if (!HasDependency(_botFactoryTemplate, nameof(_botFactoryTemplate), string.Empty)) return null;
-        if (!HasDependency(_resourcesData, nameof(_resourcesData), $"Check {nameof(GameContext)}.")) return null;
-        if (!HasDependency(_spawner, nameof(_spawner), $"Check {nameof(GameContext)}.")) return null;
-
         Vector3 spawnPosition = position;
         spawnPosition.y = 0f;
 
@@ -49,7 +34,8 @@ public class BaseFactory : MonoBehaviour
     private Base InstantiateBase(Vector3 spawnPosition)
     {
         Base newBase = Instantiate(_basePrefab, spawnPosition, Quaternion.identity);
-        newBase.name = $"Base_{Random.Range(BaseNameMin, BaseNameMax)}";
+        ++_baseNameID;
+        newBase.name = $"Base_{_baseNameID}";
         return newBase;
     }
 
@@ -70,16 +56,5 @@ public class BaseFactory : MonoBehaviour
 
         ResourceScanner scanner = newBase.GetComponentInChildren<ResourceScanner>();
         scanner?.gameObject.SetActive(true);
-    }
-
-    private bool HasDependency(Object dependency, string dependencyName, string contextHint)
-    {
-        if (dependency == null)
-        {
-            Debug.LogError($"{nameof(BaseFactory)} on '{name}': {dependencyName} is not assigned. {contextHint}", this);
-            return false;
-        }
-
-        return true;
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class ExpansionController
+public class ExpansionProvider
 {
     public event Action NewBaseBuilt;
 

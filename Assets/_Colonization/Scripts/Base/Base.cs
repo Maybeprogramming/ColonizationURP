@@ -18,13 +18,13 @@ public class Base : MonoBehaviour, IBase
     private BaseFactory _baseFactory;
     private BotRoster _roster;
     private TaskScheduler _taskScheduler;
-    private ExpansionController _expansion;
+    private ExpansionProvider _expansionProvider;
     private BaseWorkLoop _workLoop;
 
     public Vector3 Position => transform.position;
     public int ResourceCount => _warhouse.Count;
-    public Vector3 FlagPosition => _expansion.FlagPosition;
-    public bool HasConstructNewBase => _expansion.HasConstructNewBase;
+    public Vector3 FlagPosition => _expansionProvider.FlagPosition;
+    public bool HasConstructNewBase => _expansionProvider.HasConstructNewBase;
     public BaseFactory BaseFactory => _baseFactory;
     public int BotCount => _roster.Count;
     public bool HasBotOnConstructTask => _roster.HasOnConstructTask();
@@ -32,8 +32,8 @@ public class Base : MonoBehaviour, IBase
     public event Action<Resource> ResourceAdded;
     public event Action NewBaseBuilt
     {
-        add { if (_expansion != null) _expansion.NewBaseBuilt += value; }
-        remove { if (_expansion != null) _expansion.NewBaseBuilt -= value; }
+        add => SubscribeToNewBaseBuilt(value);
+        remove => UnsubscribeFromNewBaseBuilt(value);
     }
 
     private void Awake()
@@ -45,15 +45,9 @@ public class Base : MonoBehaviour, IBase
         _resourcesData = GameContext.ResourcesData;
         _baseFactory = GameContext.BaseFactory;
 
-        if (_resourcesData == null)
-            Debug.LogError($"{nameof(Base)} on '{name}': {nameof(_resourcesData)} is not assigned. Add {nameof(GameContext)} to scene.", this);
-
-        if (_baseFactory == null)
-            Debug.LogError($"{nameof(Base)} on '{name}': {nameof(_baseFactory)} is not assigned. Add {nameof(GameContext)} to scene.", this);
-
         _roster = new BotRoster(_bots);
         _roster.ClearNulls();
-        _expansion = new ExpansionController();
+        _expansionProvider = new ExpansionProvider();
     }
 
     private void OnEnable()
@@ -84,12 +78,6 @@ public class Base : MonoBehaviour, IBase
 
     public bool TrySpawnBot()
     {
-        if (_botFactory == null)
-        {
-            Debug.LogError($"{nameof(Base)} on '{name}': {nameof(_botFactory)} is not assigned. Call {nameof(SetBotFactory)} after spawn.", this);
-            return false;
-        }
-
         if (_warhouse.TrySpendResource(BaseBalance.BotSpawnCost) == false)
             return false;
 
@@ -121,19 +109,19 @@ public class Base : MonoBehaviour, IBase
             _botFactory.BotCreated -= OnBotCreated;
 
         _botFactory = factory;
-
+        
         if (_botFactory != null)
             _botFactory.BotCreated += OnBotCreated;
     }
 
     public void ClearExpansionFlag() =>
-        _expansion.ClearFlag();
+        _expansionProvider.ClearFlag();
 
     public void AssignExpansionFlag(Vector3 position) =>
-        _expansion.AssignFlag(position);
+        _expansionProvider.AssignFlag(position);
 
     public void CancelExpansion() =>
-        _expansion.Cancel();
+        _expansionProvider.Cancel();
 
     private void OnResourceAdded(Resource resource) =>
         ResourceAdded?.Invoke(resource);
@@ -143,5 +131,17 @@ public class Base : MonoBehaviour, IBase
         bot.transform.position = transform.position + BaseBalance.BotSpawnOffset;
         bot.Init(this, BaseFactory);
         AddBot(bot);
+    }
+
+    private void SubscribeToNewBaseBuilt(Action handler)
+    {
+        if (_expansionProvider != null)        
+            _expansionProvider.NewBaseBuilt += handler;        
+    }
+
+    private void UnsubscribeFromNewBaseBuilt(Action handler)
+    {
+        if (_expansionProvider != null)        
+            _expansionProvider.NewBaseBuilt -= handler;        
     }
 }
