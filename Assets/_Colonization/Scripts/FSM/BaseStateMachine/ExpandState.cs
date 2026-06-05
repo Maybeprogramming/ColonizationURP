@@ -25,7 +25,7 @@ public class ExpandState : IState
             return;
         }
 
-        if (baseData.TrySpendResources(BaseBalance.ExpandCost) == false)
+        if (baseData.TrySpendResources(BaseOption.ExpandCost) == false)
         {
             _stateMachine.TransitionTo<NormalState>();
             return;

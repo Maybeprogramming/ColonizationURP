@@ -15,7 +15,7 @@ public class NormalState : IState
     {
         IBase baseData = _stateMachine.Base;
 
-        if (baseData.HasConstructNewBase == false && baseData.ResourceCount >= BaseBalance.BotSpawnCost)
+        if (baseData.HasConstructNewBase == false && baseData.ResourceCount >= BaseOption.BotSpawnCost)
         {
             baseData.TrySpawnBot();
             return;
@@ -24,7 +24,7 @@ public class NormalState : IState
         if (baseData.HasConstructNewBase == false)
             return;
 
-        if (baseData.ResourceCount >= BaseBalance.ExpandCost &&
+        if (baseData.ResourceCount >= BaseOption.ExpandCost &&
             baseData.BotCount > 1 &&
             baseData.HasBotOnConstructTask == false)
         {

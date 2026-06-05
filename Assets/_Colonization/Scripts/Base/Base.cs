@@ -78,7 +78,7 @@ public class Base : MonoBehaviour, IBase
 
     public bool TrySpawnBot()
     {
-        if (_warhouse.TrySpendResource(BaseBalance.BotSpawnCost) == false)
+        if (_warhouse.TrySpendResource(BaseOption.BotSpawnCost) == false)
             return false;
 
         _botFactory.Spawn();
@@ -128,7 +128,7 @@ public class Base : MonoBehaviour, IBase
 
     private void OnBotCreated(Bot bot)
     {
-        bot.transform.position = transform.position + BaseBalance.BotSpawnOffset;
+        bot.transform.position = transform.position + BaseOption.BotSpawnOffset;
         bot.Init(this, BaseFactory);
         AddBot(bot);
     }

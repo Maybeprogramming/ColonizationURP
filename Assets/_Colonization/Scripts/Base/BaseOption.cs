@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class BaseBalance
+public static class BaseOption
 {
     public const int BotSpawnCost = 3;
     public const int ExpandCost = 5;
