@@ -228,6 +228,12 @@
       },
       "url": "https://packages.unity.com"
     },
+    "jp.hadashikick.vcontainer": {
+      "version": "file:D:/Downloads/VContainer-1.18.0/VContainer-1.18.0/VContainer/Assets/VContainer",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
