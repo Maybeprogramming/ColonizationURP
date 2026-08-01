@@ -229,7 +229,7 @@
       "url": "https://packages.unity.com"
     },
     "jp.hadashikick.vcontainer": {
-      "version": "file:D:/Downloads/VContainer-1.18.0/VContainer-1.18.0/VContainer/Assets/VContainer",
+      "version": "file:D:/Unity Package/VContainer-1.19.0/VContainer/Assets/VContainer",
       "depth": 0,
       "source": "local",
       "dependencies": {}
